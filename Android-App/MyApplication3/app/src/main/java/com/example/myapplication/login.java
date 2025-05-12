@@ -44,7 +44,7 @@ public class login extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.login);
+        setContentView(R.layout.welcome_page);
 
         // Login views
         studentNumber = findViewById(R.id.studentNumber);
@@ -59,6 +59,8 @@ public class login extends AppCompatActivity {
         passwordFirst = findViewById(R.id.etPasswordFirst);
         passwordVerify = findViewById(R.id.etPasswordVerify);
         signUpButton = findViewById(R.id.btnSignUp);
+
+
 
         loginButton.setOnClickListener(v -> {
             String username = studentNumber.getText().toString().trim();
