@@ -16,7 +16,7 @@ public class WelcomePage extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        super.clone();
+
         setContentView(R.layout.welcome_page);
 
         loginButton = findViewById(R.id.login_button);
@@ -33,8 +33,8 @@ public class WelcomePage extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                startActivity(new Intent(WelcomePage.this, MainActivity.class));
+                startActivity(new Intent(WelcomePage.this, register.class));
+                finish();
             }
         });
     }
