@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/background"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="20dp">
+
+            <ImageView
+                android:id="@+id/welcome_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="Logo image"
+                android:scaleType="fitCenter"
+                android:paddingLeft="10dp"
+                android:paddingRight="12dp"
+                android:src="@drawable/welcome_image">
+
+            </ImageView>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Welcome To MobileMind"
+            android:textColor="@color/blue"
+            android:textSize="35dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="14dp"
+            android:textAlignment="center"
+            android:id="@+id/welcome_page_text"
+            android:textStyle="bold">
+
+        </TextView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Join discussions, share knowledge, and get support from follow Mobile Computing students, all in one place."
+            android:textSize="20dp"
+            android:textAlignment="center"
+            android:padding="15dp"
+            android:id="@+id/description_text"
+            android:paddingTop="30dp">
+
+        </TextView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:paddingTop="20dp">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Login"
+                android:id="@+id/login_button"
+                app:cornerRadius = "12dp"
+                android:paddingLeft="35dp"
+                android:paddingRight="35dp"
+                android:textSize="18dp"
+                android:layout_marginEnd="16dp"
+                android:backgroundTint="@color/blue">
+
+            </Button>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Register"
+                android:paddingLeft="35dp"
+                android:paddingRight="35dp"
+                android:textSize="18dp"
+                android:id="@+id/register_button"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/black">
+
+            </Button>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
