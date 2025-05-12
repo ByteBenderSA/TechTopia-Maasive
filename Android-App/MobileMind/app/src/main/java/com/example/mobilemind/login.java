@@ -1,6 +1,7 @@
 package com.example.mobilemind;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -9,6 +10,9 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -26,39 +30,22 @@ public class login extends AppCompatActivity {
     EditText studentNumber;
     EditText password;
     Button loginButton;
-
-    // Signup fields
-    EditText signupStudentNumber;
-    EditText firstName;
-    EditText lastName;
-    EditText phoneNumber;
-    EditText passwordFirst;
-    EditText passwordVerify;
-    Button signUpButton;
+    Button createAccount;
 
     // URLs
-    String urlLog = "https://lamp.ms.wits.ac.za/home/s2688828/login.php";
-    String urlSign = "https://lamp.ms.wits.ac.za/home/s2688828/signUp.php";
+    final String urlLog = "https://lamp.ms.wits.ac.za/home/s2688828/login.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.welcome_page); // Make sure this is the correct layout name
+        setContentView(R.layout.login_page); // Make sure this is the correct layout name
 
         // Initialize login UI elements
         studentNumber = findViewById(R.id.login_username); // Using the correct ID from your layout
         password = findViewById(R.id.login_password);
         loginButton = findViewById(R.id.sign_in_button);
-
-        // Initialize signup UI elements
-        signupStudentNumber = findViewById(R.id.student_number);
-        firstName = findViewById(R.id.etFirstName);
-        lastName = findViewById(R.id.etLastName);
-        phoneNumber = findViewById(R.id.etPhoneNumber);
-        passwordFirst = findViewById(R.id.etPasswordFirst);
-        passwordVerify = findViewById(R.id.etPasswordVerify);
-        signUpButton = findViewById(R.id.btnSignUp);
+        createAccount = findViewById(R.id.create_account);
 
         // Login button click listener
         loginButton.setOnClickListener(v -> {
@@ -73,31 +60,11 @@ public class login extends AppCompatActivity {
 
             loginUser(username, passwordLogin);
         });
-
-        // Signup button click listener
-        signUpButton.setOnClickListener(v -> {
-            // Get and trim all inputs
-            String studentNo = signupStudentNumber.getText().toString().trim();
-            String firstNameStr = firstName.getText().toString().trim();
-            String lastNameStr = lastName.getText().toString().trim();
-            String phoneNumberStr = phoneNumber.getText().toString().trim();
-            String passwordStr = passwordFirst.getText().toString();
-            String verifyStr = passwordVerify.getText().toString();
-
-            // Validate inputs
-            if (studentNo.isEmpty() || firstNameStr.isEmpty() || lastNameStr.isEmpty() ||
-                    phoneNumberStr.isEmpty() || passwordStr.isEmpty() || verifyStr.isEmpty()) {
-                Toast.makeText(login.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            // Correct string comparison with .equals()
-            if (passwordStr.equals(verifyStr)) {
-                signUser(studentNo, passwordStr, firstNameStr, lastNameStr, phoneNumberStr);
-            } else {
-                Toast.makeText(login.this, "Passwords Do Not Match", Toast.LENGTH_SHORT).show();
-            }
+        createAccount.setOnClickListener(v -> {
+            startActivity(new Intent(login.this, register.class));
+            finish();
         });
+
     }
 
     private void loginUser(String username, String password) {
@@ -121,77 +88,69 @@ public class login extends AppCompatActivity {
                 );
                 Log.e("NetworkError", "Login request failed", e);
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseBody = response.body().string().trim();
                 Log.d("ServerResponse", "Login response: '" + responseBody + "'");
 
                 runOnUiThread(() -> {
-                    if (responseBody.equals("success")) {
-                        Toast.makeText(login.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                    try {
+                        // Parse the JSON response
+                        JSONObject jsonResponse = new JSONObject(responseBody);
 
-                        Intent intent = new Intent(login.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Toast.makeText(login.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
+                        // Extract the "success" status
+                        boolean isSuccess = jsonResponse.getBoolean("success");
+
+                        if (isSuccess) {
+                            Toast.makeText(login.this, "Login successful!", Toast.LENGTH_SHORT).show();
+
+                            // Extract the "user" data
+                            if (jsonResponse.has("user")) {
+                                JSONObject userData = jsonResponse.getJSONObject("user");
+
+
+                    String student_number = userData.getString("STUDENT_NUMBER"); // Replace "id" with the actual key in your user data
+                    String student_fname = userData.getString("STUDENT_FNAME");
+                    String student_lname = userData.getString("STUDENT_LNAME");
+                    String student_contact_no = userData.getString("STUDENT_CONTACT_NO");
+                    String student_email = userData.getString("STUDENT_EMAIL");
+                    String user_role = userData.getString("USER_ROLE");// Replace "name" with the actual key
+
+                    // Store user data in SharedPreferences
+                    SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("student_number", student_number);
+                    editor.putString("student_fname", student_fname) ;
+                    editor.putString("student_lname", student_lname);
+                    editor.putString("student_contact_no", student_contact_no);
+                    editor.putString("student_email", student_email);
+                    editor.putString("user_role", user_role);
+                    editor.apply(); // Use apply() for asynchronous saving
+
+
+                                // You can then navigate to the next activity
+                    /*
+                    Intent intent = new Intent(login.this, W.class);
+                    startActivity(intent);
+                    finish();
+                    */
+                            } else {
+                                // Handle the case where "user" data is not present in the response
+                                Toast.makeText(login.this, "Login successful, but no user data received", Toast.LENGTH_SHORT).show();
+                            }
+
+                        } else {
+                            // Extract the "message" for the error
+                            String errorMessage = jsonResponse.optString("message", "Invalid credentials"); // Use optString to avoid exception if "message" is missing
+                            Toast.makeText(login.this, errorMessage, Toast.LENGTH_SHORT).show();
+                        }
+
+                    } catch (JSONException e) {
+                        Log.e("JSONParsingError", "Error parsing JSON response", e);
+                        Toast.makeText(login.this, "Error processing server response", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
         });
-    }
-
-    private void signUser(String username, String password, String fname, String lname, String phoneNumber) {
-        OkHttpClient client = new OkHttpClient();
-
-        RequestBody formBody = new FormBody.Builder()
-                .add("STUDENT_NUMBER", username)
-                .add("PASSWORD_HASH", password)
-                .add("STUDENT_FNAME", fname)
-                .add("STUDENT_LNAME", lname)
-                .add("STUDENT_CONTACT_NO", phoneNumber)
-                .build();
-
-        Request request = new Request.Builder()
-                .url(urlSign)
-                .post(formBody)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                runOnUiThread(() ->
-                        Toast.makeText(login.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-                );
-                Log.e("NetworkError", "Signup request failed", e);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                final String responseBody = response.body().string().trim();
-                Log.d("ServerResponse", "Signup response: '" + responseBody + "'");
-
-                runOnUiThread(() -> {
-                    if (responseBody.contains("successfully created")) {
-                        Toast.makeText(login.this, "Signup successful! Please verify your email.", Toast.LENGTH_LONG).show();
-                        // Clear form fields after successful signup
-                        clearSignupFields();
-                    } else {
-                        Toast.makeText(login.this, responseBody, Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-        });
-    }
-
-    // Helper method to clear signup form fields
-    private void clearSignupFields() {
-        signupStudentNumber.setText("");
-        firstName.setText("");
-        lastName.setText("");
-        phoneNumber.setText("");
-        passwordFirst.setText("");
-        passwordVerify.setText("");
     }
 }

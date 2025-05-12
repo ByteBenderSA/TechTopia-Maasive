@@ -22,9 +22,6 @@ import okhttp3.Response;
 
 public class register extends AppCompatActivity {
 
-    // Login fields
-
-
     // Signup fields
     EditText signupStudentNumber;
     EditText firstName;
@@ -33,9 +30,9 @@ public class register extends AppCompatActivity {
     EditText passwordFirst;
     EditText passwordVerify;
     Button signUpButton;
+    Button alreadyAccount;
 
-    // URLs
-    String urlLog = "https://lamp.ms.wits.ac.za/home/s2688828/login.php";
+    // URL
     String urlSign = "https://lamp.ms.wits.ac.za/home/s2688828/signUp.php";
 
     @Override
@@ -44,19 +41,15 @@ public class register extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.register_page); // Make sure this is the correct layout name
 
-
-
         // Initialize signup UI elements
         signupStudentNumber = findViewById(R.id.student_number);
         firstName = findViewById(R.id.first_name);
         lastName = findViewById(R.id.last_name);
-        phoneNumber = findViewById(R.id.etPhone0Number);
+        phoneNumber = findViewById(R.id.phone_number);
         passwordFirst = findViewById(R.id.sign_up_password);
         passwordVerify = findViewById(R.id.confirm_password);
         signUpButton = findViewById(R.id.sign_up_button);
-
-        // Login button click listener
-
+        alreadyAccount = findViewById(R.id.already_account);
 
         // Signup button click listener
         signUpButton.setOnClickListener(v -> {
@@ -82,9 +75,12 @@ public class register extends AppCompatActivity {
                 Toast.makeText(register.this, "Passwords Do Not Match", Toast.LENGTH_SHORT).show();
             }
         });
+
+        alreadyAccount.setOnClickListener(v -> {
+            startActivity(new Intent(register.this, login.class));
+            finish();
+        });
     }
-
-
 
     private void signUser(String username, String password, String fname, String lname, String phoneNumber) {
         OkHttpClient client = new OkHttpClient();
