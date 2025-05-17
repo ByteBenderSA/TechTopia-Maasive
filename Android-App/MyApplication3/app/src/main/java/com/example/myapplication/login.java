@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -9,6 +10,9 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -22,36 +26,32 @@ import okhttp3.Response;
 
 public class login extends AppCompatActivity {
 
-    // Login fields
-    EditText studentNumber;
-    EditText password;
+    // Login UI
+    EditText studentNumber, password;
     Button loginButton;
 
-    // Signup fields
-    EditText signupStudentNumber;
-    EditText firstName;
-    EditText lastName;
-    EditText phoneNumber;
-    EditText passwordFirst;
-    EditText passwordVerify;
+    // Signup UI
+    EditText signupStudentNumber, firstName, lastName, phoneNumber, passwordFirst, passwordVerify;
     Button signUpButton;
 
     // URLs
-    String urlLog = "https://lamp.ms.wits.ac.za/home/s2688828/login.php";
-    String urlSign = "https://lamp.ms.wits.ac.za/home/s2688828/signUp.php";
+    final String urlLog = "https://lamp.ms.wits.ac.za/home/s2688828/login.php";
+    final String urlSign = "https://lamp.ms.wits.ac.za/home/s2688828/signUp.php";
+
+    OkHttpClient client = new OkHttpClient();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.login); // Make sure this is the correct layout name
+        setContentView(R.layout.login);
 
-        // Initialize login UI elements
-        studentNumber = findViewById(R.id.studentNumber); // Using the correct ID from your layout
+        // Login views
+        studentNumber = findViewById(R.id.studentNumber);
         password = findViewById(R.id.txtPassword);
         loginButton = findViewById(R.id.btnLogin);
 
-        // Initialize signup UI elements
+        // Signup views
         signupStudentNumber = findViewById(R.id.etSignupStudentNumber);
         firstName = findViewById(R.id.etFirstName);
         lastName = findViewById(R.id.etLastName);
@@ -60,48 +60,45 @@ public class login extends AppCompatActivity {
         passwordVerify = findViewById(R.id.etPasswordVerify);
         signUpButton = findViewById(R.id.btnSignUp);
 
-        // Login button click listener
         loginButton.setOnClickListener(v -> {
             String username = studentNumber.getText().toString().trim();
-            String passwordLogin = password.getText().toString().trim();
+            String pwd = password.getText().toString().trim();
 
-            // Validate inputs
-            if (username.isEmpty() || passwordLogin.isEmpty()) {
-                Toast.makeText(login.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            if (username.isEmpty() || pwd.isEmpty()) {
+                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            loginUser(username, passwordLogin);
+            loginUser(username, pwd);
         });
 
-        // Signup button click listener
         signUpButton.setOnClickListener(v -> {
-            // Get and trim all inputs
             String studentNo = signupStudentNumber.getText().toString().trim();
-            String firstNameStr = firstName.getText().toString().trim();
-            String lastNameStr = lastName.getText().toString().trim();
-            String phoneNumberStr = phoneNumber.getText().toString().trim();
-            String passwordStr = passwordFirst.getText().toString();
-            String verifyStr = passwordVerify.getText().toString();
+            String fname = firstName.getText().toString().trim();
+            String lname = lastName.getText().toString().trim();
+            String phone = phoneNumber.getText().toString().trim();
+            String pwd1 = passwordFirst.getText().toString();
+            String pwd2 = passwordVerify.getText().toString();
 
-            // Validate inputs
-            if (studentNo.isEmpty() || firstNameStr.isEmpty() || lastNameStr.isEmpty() ||
-                    phoneNumberStr.isEmpty() || passwordStr.isEmpty() || verifyStr.isEmpty()) {
-                Toast.makeText(login.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            if (studentNo.isEmpty() || fname.isEmpty() || lname.isEmpty() ||
+                    phone.isEmpty() || pwd1.isEmpty() || pwd2.isEmpty()) {
+                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Correct string comparison with .equals()
-            if (passwordStr.equals(verifyStr)) {
-                signUser(studentNo, passwordStr, firstNameStr, lastNameStr, phoneNumberStr);
-            } else {
-                Toast.makeText(login.this, "Passwords Do Not Match", Toast.LENGTH_SHORT).show();
+            if (!pwd1.equals(pwd2)) {
+                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            signUser(studentNo, pwd1, fname, lname, phone);
         });
     }
 
     private void loginUser(String username, String password) {
-        OkHttpClient client = new OkHttpClient();
+        runOnUiThread(() ->
+                Toast.makeText(this, "Logging in...", Toast.LENGTH_SHORT).show()
+        );
 
         RequestBody formBody = new FormBody.Builder()
                 .add("STUDENT_NUMBER", username)
@@ -119,38 +116,64 @@ public class login extends AppCompatActivity {
                 runOnUiThread(() ->
                         Toast.makeText(login.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                 );
-                Log.e("NetworkError", "Login request failed", e);
+                Log.e("LoginError", "Network failure", e);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseBody = response.body().string().trim();
-                Log.d("ServerResponse", "Login response: '" + responseBody + "'");
 
                 runOnUiThread(() -> {
-                    if (responseBody.equals("success")) {
-                        Toast.makeText(login.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                    try {
+                        if (responseBody.startsWith("<") || responseBody.contains("Warning:")) {
+                            Toast.makeText(login.this, "Server error. Contact admin.", Toast.LENGTH_LONG).show();
+                            return;
+                        }
 
-                        Intent intent = new Intent(login.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Toast.makeText(login.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
+                        JSONObject json = new JSONObject(responseBody);
+                        boolean success = json.getBoolean("success");
+
+                        if (success) {
+                            JSONObject user = json.getJSONObject("user");
+
+                            // Save user data in SharedPreferences
+                            SharedPreferences prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("STUDENT_NUMBER", user.getString("STUDENT_NUMBER"));
+                            editor.putString("STUDENT_FNAME", user.getString("STUDENT_FNAME"));
+                            editor.putString("STUDENT_LNAME", user.getString("STUDENT_LNAME"));
+                            editor.putString("STUDENT_EMAIL", user.getString("STUDENT_EMAIL"));
+                            editor.apply();
+
+                            Toast.makeText(login.this, "Login successful!", Toast.LENGTH_SHORT).show();
+
+
+                            startActivity(new Intent(login.this, MainActivity.class));
+                            finish();
+                        } else {
+                            String errorMsg = json.optString("error", "Login failed");
+                            Toast.makeText(login.this, errorMsg, Toast.LENGTH_LONG).show();
+                        }
+                    } catch (JSONException e) {
+                        String errorMsg = "Invalid response from server";
+                        if (responseBody.isEmpty()) errorMsg = "Empty response from server";
+                        else if (responseBody.length() > 100) errorMsg = "Unexpected server response";
+
+                        Toast.makeText(login.this, errorMsg, Toast.LENGTH_LONG).show();
+                        Log.e("LoginError", "Parsing error", e);
                     }
                 });
             }
         });
     }
 
-    private void signUser(String username, String password, String fname, String lname, String phoneNumber) {
-        OkHttpClient client = new OkHttpClient();
-
+    private void signUser(String studentNo, String password, String fname, String lname, String phone) {
         RequestBody formBody = new FormBody.Builder()
-                .add("STUDENT_NUMBER", username)
+                .add("STUDENT_NUMBER", studentNo)
                 .add("PASSWORD_HASH", password)
                 .add("STUDENT_FNAME", fname)
                 .add("STUDENT_LNAME", lname)
-                .add("STUDENT_CONTACT_NO", phoneNumber)
+                .add("STUDENT_CONTACT_NO", phone)
                 .build();
 
         Request request = new Request.Builder()
@@ -164,18 +187,16 @@ public class login extends AppCompatActivity {
                 runOnUiThread(() ->
                         Toast.makeText(login.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                 );
-                Log.e("NetworkError", "Signup request failed", e);
+                Log.e("SignupError", "Network failure", e);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseBody = response.body().string().trim();
-                Log.d("ServerResponse", "Signup response: '" + responseBody + "'");
 
                 runOnUiThread(() -> {
                     if (responseBody.contains("successfully created")) {
-                        Toast.makeText(login.this, "Signup successful! Please verify your email.", Toast.LENGTH_LONG).show();
-                        // Clear form fields after successful signup
+                        Toast.makeText(login.this, "Signup successful!", Toast.LENGTH_LONG).show();
                         clearSignupFields();
                     } else {
                         Toast.makeText(login.this, responseBody, Toast.LENGTH_LONG).show();
@@ -185,7 +206,6 @@ public class login extends AppCompatActivity {
         });
     }
 
-    // Helper method to clear signup form fields
     private void clearSignupFields() {
         signupStudentNumber.setText("");
         firstName.setText("");

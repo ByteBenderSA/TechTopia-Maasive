@@ -3,9 +3,9 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 $host = "127.0.0.1";
-$db = "d268"
-$user = "s268"
-$pass = "s268;
+$db = "d2688828"
+$user = "s2688828"
+$pass = "s2688828;
 
 $conn = new mysqli($host, $user, $pass, $db);
 
@@ -40,17 +40,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($stmt1->execute() && $stmt2->execute()) {
         $verificationLink = "https://lamp.ms.wits.ac.za/home/s2688828/verify.php?token=$token";
 
-        $headers = "From: noreply@students.wits.ac.za\r\n";
-        $headers .= "Reply-To: noreply@students.wits.ac.za\r\n";
-        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-
-        // Use the correct email variable
-        mail($student_email, "Verify your email", "Click here to verify: $verificationLink", $headers);
-
-        echo "User successfully created. Please check your email to verify your account.";
-    } else {
-        echo "Error: " . $stmt1->error . "<br>" . $stmt2->error;
-    }
+            use PHPMailer\PHPMailer\PHPMailer;
+            use PHPMailer\PHPMailer\Exception;
+            
+            require 'vendor/autoload.php'; // If using Composer
+            // OR if manually including files:
+            // require 'path/to/PHPMailer/src/Exception.php';
+            // require 'path/to/PHPMailer/src/PHPMailer.php';
+            // require 'path/to/PHPMailer/src/SMTP.php';
+            
+            $mail = new PHPMailer(true);
+            
+            try {
+                //Server settings
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.gmail.com'; // Use your SMTP provider
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'tshilidzisibara4@gmail.com'; // Your SMTP username
+                $mail->Password   = 'ffhr bfcm regp kuix'; // Your SMTP password or app-specific password
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // or PHPMailer::ENCRYPTION_SMTPS
+                $mail->Port       = 587;
+            
+                //Recipients
+                $mail->setFrom('noreply@students.wits.ac.za', 'Wits Student System');
+                $mail->addAddress($student_email);
+            
+                // Content
+                $mail->isHTML(false);
+                $mail->Subject = 'Verify your email';
+                $mail->Body    = "Click here to verify: $verificationLink";
+            
+                $mail->send();
+                echo "User successfully created. Please check your email to verify your account.";
+            } catch (Exception $e) {
+                echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+            }
+            
 
     $stmt1->close();
     $stmt2->close();
