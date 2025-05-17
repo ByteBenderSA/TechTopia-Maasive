@@ -1,8 +1,8 @@
 <?php
 $host = "127.0.0.1";
-$db = "d2688828";
-$user = "s2688828";
-$pass = "s2688828";
+$db = "d2688828"; 
+$user = "s2688828"; 
+$pass = "s2688828"; 
 
 $conn = new mysqli($host, $user, $pass, $db);
 
@@ -15,13 +15,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
     $stmt = $conn->prepare("INSERT INTO POSTS (STUDENT_NUMBER, TITLE, POST_QUESTION, POST_DATE) VALUES (?,?,?,?)");
     if($stmt){
         $stmt->bind_param("ssss", $student_number, $postHead, $postText, $currentDateTime);
-        $stmt->execute();
+        if ($stmt->execute()) {
+            echo "Post created successfully!";
+        } else {
+            echo "Execute failed: " . $stmt->error;
+        }
         $stmt->close();
     }
     else{
         echo "Prepare failed: " . $conn->error;
     }
-
-
 }
 ?>

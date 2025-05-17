@@ -26,7 +26,7 @@ public class WelcomePage extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(WelcomePage.this, login.class));
-                finish();
+
             }
         });
 
