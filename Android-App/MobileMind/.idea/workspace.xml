@@ -5,6 +5,21 @@
       <config />
     </shared>
     <layouts>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/comment.xml">
+        <config>
+          <theme>@style/Theme.MobileMind</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/comment_background.xml">
+        <config>
+          <theme>@style/Theme.MobileMind</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/custom_edittext.xml">
+        <config>
+          <theme>@style/Theme.MobileMind</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/post_background.xml">
         <config>
           <theme>@style/Theme.MobileMind</theme>
@@ -20,7 +35,37 @@
           <theme>@style/Theme.MobileMind</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/comment_laytout.xml">
+        <config>
+          <theme>@style/Theme.MobileMind</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_activity.xml">
+        <config>
+          <theme>@style/Theme.MobileMind</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_home2.xml">
+        <config>
+          <theme>@style/Theme.MobileMind</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_post.xml">
+        <config>
+          <theme>@style/Theme.MobileMind</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_profile.xml">
+        <config>
+          <theme>@style/Theme.MobileMind</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/home_page.xml">
+        <config>
+          <theme>@style/Theme.MobileMind</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_layout.xml">
         <config>
           <theme>@style/Theme.MobileMind</theme>
         </config>
@@ -42,126 +87,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1f89e16b-f7f1-4a66-8b41-d44ccd9ee85f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/checksums/checksums.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/checksums/md5-checksums.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/checksums/sha1-checksums.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidPluginAccessors.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibs$BundleAccessors.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibs$EspressoLibraryAccessors.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibs$ExtLibraryAccessors.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibs$PluginAccessors.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibs$VersionAccessors.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibs.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock$AndroidPluginAccessors.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock$BundleAccessors.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock$EspressoLibraryAccessors.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock$ExtLibraryAccessors.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock$PluginAccessors.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock$VersionAccessors.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/classes/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/metadata.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/sources/org/gradle/accessors/dm/LibrariesForLibs.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/19666b7ee7477488faba75fa6199859f9eeb0a35/sources/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/dependencies-accessors/gc.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/executionHistory/executionHistory.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/fileChanges/last-build.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/fileHashes/fileHashes.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/fileHashes/fileHashes.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/fileHashes/resourceHashesCache.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.10.2/gc.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.11.1/checksums/checksums.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.11.1/fileChanges/last-build.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.11.1/fileHashes/fileHashes.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/8.11.1/gc.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/cache.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/config.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/vcs-1/gc.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/ForumPost.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/ForumPostActivity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/ForumUtils.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_comment.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_favorite.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_more_vert.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/post_background.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/up_vote.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_forum_post.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/home_page.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/local.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/Car.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/CarAdapter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/MainActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/WelcomePage.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/WelcomePage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/login.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/login.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/.idea/.name" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/.idea/AndroidProjectSystem.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/.idea/compiler.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/.idea/deploymentTargetDropDown.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/.idea/deploymentTargetSelector.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/.idea/gradle.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/.idea/migrations.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/.idea/runConfigurations.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/build.gradle.kts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/proguard-rules.pro" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/androidTest/java/com/example/myapplication/ExampleInstrumentedTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/AndroidManifest.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/java/com/example/myapplication/Car.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/java/com/example/myapplication/CarAdapter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/java/com/example/myapplication/MainActivity.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/java/com/example/myapplication/login.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/drawable/background.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/drawable/baseline_person_24.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/drawable/custom_edittext.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/drawable/ic_launcher_background.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/drawable/ic_launcher_foreground.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/drawable/password.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/drawable/welcome_image.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/layout/activity_main.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/layout/car_item.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/layout/login.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/layout/login_page.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/layout/register_page.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/layout/welcome_page.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/mipmap-hdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/mipmap-mdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/values-night/themes.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/values/colors.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/values/strings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/values/themes.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/xml/backup_rules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/main/res/xml/data_extraction_rules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/app/src/test/java/com/example/myapplication/ExampleUnitTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/build.gradle.kts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/gradle.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/gradle/libs.versions.toml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/gradlew" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/gradlew.bat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MyApplication3/settings.gradle.kts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../php/post.php" beforeDir="false" afterPath="$PROJECT_DIR$/../../php/post.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/Comment.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/CommentAdapter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/comment.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/comment_background.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/comment_input_background.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/comment_laytout.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_layout.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/ForumPostActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/mobilemind/ForumPostActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_forum_post.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_forum_post.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -171,7 +106,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=PhysicalDevice, isTemplate=false, identifier=serial=R58X80QY4GK)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\clayt\.android\avd\Pixel_6_Pro_API_30.avd)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -197,8 +132,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="layoutResourceFile" />
         <option value="resourceFile" />
+        <option value="layoutResourceFile" />
         <option value="Class" />
       </list>
     </option>
@@ -224,12 +159,18 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/ByteBenderSA/TechTopia-Maasive.git",
-    "accountId": "f79efcce-cd89-47d5-b853-2e165a059063"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;ByteBenderSA&quot;
   }
-}]]></component>
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/ByteBenderSA/TechTopia-Maasive.git&quot;,
+    &quot;accountId&quot;: &quot;f79efcce-cd89-47d5-b853-2e165a059063&quot;
+  }
+}</component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -237,6 +178,9 @@
   &quot;associatedIndex&quot;: 8
 }</component>
   <component name="ProjectId" id="2wyQxLZjkRrplbG632Mr4TaNWob" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectReloadState">
     <option name="STATE" value="1" />
   </component>
@@ -244,25 +188,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Android App.app.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "ByteBender",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/clayt/Documents/TechTopia/TechTopia-Maasive/Android-App/MyApplication3",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.17",
-    "project.structure.side.proportion": "0.2",
-    "recommended.upgrade.last.time.stamp": "1747119211299"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;ByteBender&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/clayt/Documents/TechTopia/TechTopia-Maasive/Android-App/MyApplication3&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;recommended.upgrade.last.time.stamp&quot;: &quot;1747119211299&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="Mobile_Mind.app" />
@@ -353,12 +297,12 @@
       <map>
         <entry key="com.example.mobilemind">
           <value>
-            <CheckInfo lastCheckTimestamp="1747485676130" />
+            <CheckInfo lastCheckTimestamp="1747642537688" />
           </value>
         </entry>
         <entry key="com.example.mobilemind.test">
           <value>
-            <CheckInfo lastCheckTimestamp="1747485676126" />
+            <CheckInfo lastCheckTimestamp="1747642537672" />
           </value>
         </entry>
       </map>
