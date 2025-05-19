@@ -31,10 +31,10 @@ public class HomeFragment extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_home);
+        setContentView(R.layout.fragment_home2);
 
         // Initialize lists
-        ArrayList<>discussionsList = new ArrayList<>();
+        discussionsList = new ArrayList<>();
         filteredList = new ArrayList<>();
 
         // Set up RecyclerView
