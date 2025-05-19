@@ -20,7 +20,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class HomeFragment extends AppCompatActivity {
 
     private DiscussionAdapter discussionAdapter;
     private EditText searchEditText;
