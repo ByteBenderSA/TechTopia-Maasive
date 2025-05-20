@@ -97,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/custom_edittext"
                 android:completionThreshold="1"
-                android:hint="@string/hello_blank_fragment"
+                android:hint="Role"
                 android:inputType="textAutoComplete"
                 android:padding="8dp"
                 android:textSize="24dp" />
