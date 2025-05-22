@@ -39,10 +39,10 @@ public class login extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.login_page); // Make sure this is the correct layout name
+        setContentView(R.layout.login_page);
 
         // Initialize login UI elements
-        studentNumber = findViewById(R.id.login_username); // Using the correct ID from your layout
+        studentNumber = findViewById(R.id.login_username);
         password = findViewById(R.id.login_password);
         loginButton = findViewById(R.id.sign_in_button);
         createAccount = findViewById(R.id.create_account);
@@ -60,11 +60,11 @@ public class login extends AppCompatActivity {
 
             loginUser(username, passwordLogin);
         });
+
         createAccount.setOnClickListener(v -> {
             startActivity(new Intent(login.this, register.class));
             finish();
         });
-
     }
 
     private void loginUser(String username, String password) {
@@ -83,11 +83,12 @@ public class login extends AppCompatActivity {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                runOnUiThread(() ->
-                        Toast.makeText(login.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-                );
-                Log.e("NetworkError", "Login request failed", e);
+                runOnUiThread(() -> {
+                    Log.e("NetworkError", "Login request failed", e);
+                    Toast.makeText(login.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
             }
+
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseBody = response.body().string().trim();
@@ -98,55 +99,60 @@ public class login extends AppCompatActivity {
                         // Parse the JSON response
                         JSONObject jsonResponse = new JSONObject(responseBody);
 
-                        // Extract the "success" status
-                        boolean isSuccess = jsonResponse.getBoolean("success");
+                        // Check for success or error in the response
+                        if (jsonResponse.has("success")) {
+                            boolean isSuccess = jsonResponse.getBoolean("success");
 
-                        if (isSuccess) {
-                            Toast.makeText(login.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                            if (isSuccess) {
+                                Toast.makeText(login.this, "Login successful!", Toast.LENGTH_SHORT).show();
 
-                            // Extract the "user" data
-                            if (jsonResponse.has("user")) {
-                                JSONObject userData = jsonResponse.getJSONObject("user");
+                                // Extract user data if available
+                                if (jsonResponse.has("user")) {
+                                    JSONObject userData = jsonResponse.getJSONObject("user");
 
+                                    // Extract individual user data fields
+                                    String student_number = userData.getString("STUDENT_NUMBER");
+                                    String student_fname = userData.getString("STUDENT_FNAME");
+                                    String student_lname = userData.getString("STUDENT_LNAME");
+                                    String student_contact_no = userData.getString("STUDENT_CONTACT_NO");
+                                    String student_email = userData.getString("STUDENT_EMAIL");
+                                    String user_role = userData.getString("USER_ROLE");
 
-                    String student_number = userData.getString("STUDENT_NUMBER"); // Replace "id" with the actual key in your user data
-                    String student_fname = userData.getString("STUDENT_FNAME");
-                    String student_lname = userData.getString("STUDENT_LNAME");
-                    String student_contact_no = userData.getString("STUDENT_CONTACT_NO");
-                    String student_email = userData.getString("STUDENT_EMAIL");
-                    String user_role = userData.getString("USER_ROLE");// Replace "name" with the actual key
+                                    // Store user data in SharedPreferences
+                                    SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                    editor.putString("student_number", student_number);
+                                    editor.putString("student_fname", student_fname);
+                                    editor.putString("student_lname", student_lname);
+                                    editor.putString("student_contact_no", student_contact_no);
+                                    editor.putString("student_email", student_email);
+                                    editor.putString("user_role", user_role);
+                                    editor.apply();
 
-                    // Store user data in SharedPreferences
-                    SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("student_number", student_number);
-                    editor.putString("student_fname", student_fname) ;
-                    editor.putString("student_lname", student_lname);
-                    editor.putString("student_contact_no", student_contact_no);
-                    editor.putString("student_email", student_email);
-                    editor.putString("user_role", user_role);
-                    editor.apply(); // Use apply() for asynchronous saving
-
-
-                                // You can then navigate to the next activity
-                    /*
-                    Intent intent = new Intent(login.this, W.class);
-                    startActivity(intent);
-                    finish();
-                    */
+                                    // Navigate to the next activity
+                                    startActivity(new Intent(login.this, ForumPostActivity.class));
+                                    finish();
+                                } else {
+                                    // Handle the case where user data is missing
+                                    Toast.makeText(login.this, "Login successful, but no user data received", Toast.LENGTH_SHORT).show();
+                                }
                             } else {
-                                // Handle the case where "user" data is not present in the response
-                                Toast.makeText(login.this, "Login successful, but no user data received", Toast.LENGTH_SHORT).show();
+                                // Handle authentication failure
+                                String errorMessage = jsonResponse.optString("message", "Authentication failed");
+                                Toast.makeText(login.this, errorMessage, Toast.LENGTH_SHORT).show();
                             }
-
-                        } else {
-                            // Extract the "message" for the error
-                            String errorMessage = jsonResponse.optString("message", "Invalid credentials"); // Use optString to avoid exception if "message" is missing
+                        } else if (jsonResponse.has("error")) {
+                            // Handle old error format
+                            String errorMessage = jsonResponse.getString("error");
                             Toast.makeText(login.this, errorMessage, Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Unknown response format
+                            Toast.makeText(login.this, "Unrecognized server response", Toast.LENGTH_SHORT).show();
+                            Log.e("LoginError", "Unrecognized response format: " + responseBody);
                         }
-
                     } catch (JSONException e) {
-                        Log.e("JSONParsingError", "Error parsing JSON response", e);
+                        Log.e("JSONParsingError", "Error parsing JSON response: " + e.getMessage(), e);
+                        Log.e("JSONParsingError", "Response body: " + responseBody);
                         Toast.makeText(login.this, "Error processing server response", Toast.LENGTH_SHORT).show();
                     }
                 });
