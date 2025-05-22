@@ -7,20 +7,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -30,7 +21,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class posting extends AppCompatActivity {
 
     Button btnPost = findViewById(R.id.btnPost);
     RecyclerView recyclerView;
@@ -80,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 runOnUiThread(() ->
-                        Toast.makeText(MainActivity.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(posting.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                 );
                 Log.e("NetworkError", "Signup request failed", e);
             }
@@ -92,11 +83,11 @@ public class MainActivity extends AppCompatActivity {
 
                 runOnUiThread(() -> {
                     if (responseBody.contains("Post successfully created.")) {
-                        Toast.makeText(MainActivity.this, "Signup successful! Please verify your email.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(posting.this, "Signup successful! Please verify your email.", Toast.LENGTH_LONG).show();
                         // Clear form fields after successful signup
                         clearSignupFields();
                     } else {
-                        Toast.makeText(MainActivity.this, responseBody, Toast.LENGTH_LONG).show();
+                        Toast.makeText(posting.this, responseBody, Toast.LENGTH_LONG).show();
                     }
                 });
             }
