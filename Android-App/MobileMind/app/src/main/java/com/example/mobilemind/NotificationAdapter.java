@@ -25,7 +25,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             super(view);
             title = view.findViewById(R.id.notification_title);
             time = view.findViewById(R.id.notification_timestamp);
-            icon = view.findViewById(R.id.icon);
+            icon = view.findViewById(R.id.notification_icon);
         }
     }
 

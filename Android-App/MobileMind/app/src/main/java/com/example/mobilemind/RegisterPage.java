@@ -20,7 +20,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class register extends AppCompatActivity {
+public class RegisterPage extends AppCompatActivity {
 
     // Signup fields
     EditText signupStudentNumber;
@@ -64,7 +64,7 @@ public class register extends AppCompatActivity {
             // Validate inputs
             if (studentNo.isEmpty() || firstNameStr.isEmpty() || lastNameStr.isEmpty() ||
                     phoneNumberStr.isEmpty() || passwordStr.isEmpty() || verifyStr.isEmpty()) {
-                Toast.makeText(register.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegisterPage.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -72,12 +72,12 @@ public class register extends AppCompatActivity {
             if (passwordStr.equals(verifyStr)) {
                 signUser(studentNo, passwordStr, firstNameStr, lastNameStr, phoneNumberStr);
             } else {
-                Toast.makeText(register.this, "Passwords Do Not Match", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegisterPage.this, "Passwords Do Not Match", Toast.LENGTH_SHORT).show();
             }
         });
 
         alreadyAccount.setOnClickListener(v -> {
-            startActivity(new Intent(register.this, login.class));
+            startActivity(new Intent(RegisterPage.this, LoginPage.class));
             finish();
         });
     }
@@ -102,7 +102,7 @@ public class register extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 runOnUiThread(() ->
-                        Toast.makeText(register.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(RegisterPage.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                 );
                 Log.e("NetworkError", "Signup request failed", e);
             }
@@ -114,11 +114,11 @@ public class register extends AppCompatActivity {
 
                 runOnUiThread(() -> {
                     if (responseBody.contains("successfully created")) {
-                        Toast.makeText(register.this, "Signup successful! Please verify your email.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(RegisterPage.this, "Signup successful! Please verify your email.", Toast.LENGTH_LONG).show();
                         // Clear form fields after successful signup
                         clearSignupFields();
                     } else {
-                        Toast.makeText(register.this, responseBody, Toast.LENGTH_LONG).show();
+                        Toast.makeText(RegisterPage.this, responseBody, Toast.LENGTH_LONG).show();
                     }
                 });
             }
