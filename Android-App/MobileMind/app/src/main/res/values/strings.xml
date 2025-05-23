@@ -9,4 +9,25 @@
     <string name="header_post_question">Post a Question</string>
     <string name="button_cancel">Cancel</string>
 
+    <string name="label_role">Role: </string>
+    <string name="role">Student</string>
+    <string name="hint_phone_number">Phone Number</string>
+    <string name="hint_dob">Date of Birth (dd/mm/yyyy)</string>
+    <string name="button_save_changes">Save Changes</string>
+    <string name="back">Go Back</string>
+    <string name="email">E-mail</string>
+    <string name="mobile">Mobile</string>
+    <string name="dob">Date of Birth</string>
+    <string name="enter_email">Enter E-mail</string>
+    <string name="enter_mobile">Enter Mobile number</string>
+    <string name="select_dob">Select Date of Birth</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="student_number">Student Number</string>
+    <string name="student">Student</string>
+    <string name="save">SAVE</string>
+    <string name="user_profile">User Profile</string>
+    <string name="profile_image_desc">Profile picture</string>
+
+
 </resources>

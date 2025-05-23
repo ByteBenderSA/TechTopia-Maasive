@@ -102,13 +102,17 @@
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:ignore="NotSibling"
+            />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="16dp"
+            tools:ignore="MissingConstraints"
+            />
 
         <!-- Notification Item 1 -->
         <LinearLayout
@@ -118,16 +122,17 @@
             android:padding="12dp"
             android:background="@color/light_blue"
             android:layout_marginBottom="8dp"
-            android:elevation="2dp">
+            android:elevation="2dp"
+            tools:ignore="MissingConstraints">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/baseline_add_task_24"
-                app:tint="@color/blue"
-                android:id="@+id/notification_icon"
-                android:layout_marginEnd="16dp" />
+                android:id="@+id/home_profile_image"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerInParent="true"
+                android:background="@drawable/circle_background"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_person_placeholder" />
 
             <LinearLayout
                 android:layout_width="0dp"
