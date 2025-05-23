@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
     <color name="blue">#1F41BB</color>
     <color name="light_blue">#E7EAF6</color>
-        <!-- Add other color definitions here if they exist -->
-    <color name="gray_light">#D3D3D3</color>
-    <color name="border_gray">#CCCCCC</color>
+    <!--  Primary blue  -->
+    <color name="primary_blue">#3C55E3</color>
+    <color name="primary_blue_dark">#2A3CC0</color>
+    <!--  White for backgrounds and text on blue  -->
+    <color name="white">#FFFFFF</color>
+    <!--  Gray for borders, hints, and subtle backgrounds  -->
+    <color name="gray_light">#E0E0E0</color>
+    <color name="border_gray">#E0E0E0</color>
+    <color name="gray_medium">#B0B0B0</color>
+    <color name="gray_dark">#666666</color>
+    <!--  Text colors  -->
+    <color name="text_primary">#000000</color>
+    <color name="text_on_primary">@color/white</color>
 </resources>
