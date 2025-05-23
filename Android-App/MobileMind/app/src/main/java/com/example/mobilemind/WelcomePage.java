@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class WelcomePage extends AppCompatActivity {
 
@@ -25,7 +24,7 @@ public class WelcomePage extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(WelcomePage.this, login.class));
+                startActivity(new Intent(WelcomePage.this, LoginPage.class));
 
             }
         });
@@ -33,7 +32,7 @@ public class WelcomePage extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(WelcomePage.this, register.class));
+                startActivity(new Intent(WelcomePage.this, RegisterPage.class));
                 finish();
             }
         });

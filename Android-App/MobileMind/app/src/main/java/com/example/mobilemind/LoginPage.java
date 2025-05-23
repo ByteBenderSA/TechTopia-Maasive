@@ -24,7 +24,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class login extends AppCompatActivity {
+public class LoginPage extends AppCompatActivity {
 
     // Login fields
     EditText studentNumber;
@@ -54,7 +54,7 @@ public class login extends AppCompatActivity {
 
             // Validate inputs
             if (username.isEmpty() || passwordLogin.isEmpty()) {
-                Toast.makeText(login.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginPage.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -62,7 +62,7 @@ public class login extends AppCompatActivity {
         });
 
         createAccount.setOnClickListener(v -> {
-            startActivity(new Intent(login.this, register.class));
+            startActivity(new Intent(LoginPage.this, RegisterPage.class));
             finish();
         });
     }
@@ -85,7 +85,7 @@ public class login extends AppCompatActivity {
             public void onFailure(Call call, IOException e) {
                 runOnUiThread(() -> {
                     Log.e("NetworkError", "Login request failed", e);
-                    Toast.makeText(login.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginPage.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
             }
 
@@ -104,7 +104,7 @@ public class login extends AppCompatActivity {
                             boolean isSuccess = jsonResponse.getBoolean("success");
 
                             if (isSuccess) {
-                                Toast.makeText(login.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginPage.this, "Login successful!", Toast.LENGTH_SHORT).show();
 
                                 // Extract user data if available
                                 if (jsonResponse.has("user")) {
@@ -130,30 +130,30 @@ public class login extends AppCompatActivity {
                                     editor.apply();
 
                                     // Navigate to the next activity
-                                    startActivity(new Intent(login.this, ForumPostActivity.class));
+                                    startActivity(new Intent(LoginPage.this, ForumPostActivity.class));
                                     finish();
                                 } else {
                                     // Handle the case where user data is missing
-                                    Toast.makeText(login.this, "Login successful, but no user data received", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(LoginPage.this, "Login successful, but no user data received", Toast.LENGTH_SHORT).show();
                                 }
                             } else {
                                 // Handle authentication failure
                                 String errorMessage = jsonResponse.optString("message", "Authentication failed");
-                                Toast.makeText(login.this, errorMessage, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginPage.this, errorMessage, Toast.LENGTH_SHORT).show();
                             }
                         } else if (jsonResponse.has("error")) {
                             // Handle old error format
                             String errorMessage = jsonResponse.getString("error");
-                            Toast.makeText(login.this, errorMessage, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginPage.this, errorMessage, Toast.LENGTH_SHORT).show();
                         } else {
                             // Unknown response format
-                            Toast.makeText(login.this, "Unrecognized server response", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginPage.this, "Unrecognized server response", Toast.LENGTH_SHORT).show();
                             Log.e("LoginError", "Unrecognized response format: " + responseBody);
                         }
                     } catch (JSONException e) {
                         Log.e("JSONParsingError", "Error parsing JSON response: " + e.getMessage(), e);
                         Log.e("JSONParsingError", "Response body: " + responseBody);
-                        Toast.makeText(login.this, "Error processing server response", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginPage.this, "Error processing server response", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
