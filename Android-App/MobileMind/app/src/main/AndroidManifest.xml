@@ -34,6 +34,9 @@
         <activity android:name=".ForumPostActivity">
 
         </activity>
+        <activity android:name=".testing">
+
+        </activity>
     </application>
 
 </manifest>
