@@ -1,26 +1,38 @@
 // MainActivity.java
 package com.example.mobilemind;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class HomeFragment extends AppCompatActivity {
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+public class HomeFragment extends Fragment {
 
     private DiscussionAdapter discussionAdapter;
     private EditText searchEditText;
@@ -29,17 +41,33 @@ public class HomeFragment extends AppCompatActivity {
     private TextView orderByText;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_home2);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
 
+        // Initialize views from the inflated layout
+        setupViews(view);
+        setupRecyclerView(view);
+        setupSearch();
+        
+        // Load real posts data from SharedPreferences
+        loadDiscussionsFromPreferences();
+        
+        return view;
+    }
+
+    private void setupViews(View view) {
+        searchEditText = view.findViewById(R.id.searchEditText);
+        
         // Initialize lists
         discussionsList = new ArrayList<>();
         filteredList = new ArrayList<>();
+    }
 
+    private void setupRecyclerView(View view) {
         // Set up RecyclerView
-        RecyclerView recyclerView = findViewById(R.id.discussionsRecyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        RecyclerView recyclerView = view.findViewById(R.id.discussionsRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // Add divider between items
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
@@ -49,9 +77,10 @@ public class HomeFragment extends AppCompatActivity {
         // Create and set adapter
         discussionAdapter = new DiscussionAdapter(filteredList);
         recyclerView.setAdapter(discussionAdapter);
+    }
 
+    private void setupSearch() {
         // Set up search functionality
-        searchEditText = findViewById(R.id.searchEditText);
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -68,23 +97,72 @@ public class HomeFragment extends AppCompatActivity {
                 // Not used
             }
         });
-
-        // Load sample data
-        loadSampleData();
     }
 
-    private void loadSampleData() {
-        discussionsList.add(new Discussion(1, "Allocated Mentor", "8 Apr, 20:49", false));
-        discussionsList.add(new Discussion(2, "Physics tutorials during protest", "2 Mar, 12:28", false));
-        discussionsList.add(new Discussion(3, "WSOE", "15 Feb, 21:18", false));
-        discussionsList.add(new Discussion(4, "Orientation", "7 Feb, 08:24", true));
-        discussionsList.add(new Discussion(5, "Times for Orientation", "5 Feb, 23:31", true));
-        discussionsList.add(new Discussion(6, "Course Materials", "2 Feb, 14:15", false));
-        discussionsList.add(new Discussion(7, "Study Group Formation", "1 Feb, 09:30", false));
-
-        // Add all to filtered list initially
+    private void loadDiscussionsFromPreferences() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        String postsData = sharedPreferences.getString("posts_data", "[]");
+        
+        try {
+            JSONArray postsArray = new JSONArray(postsData);
+            discussionsList.clear();
+            
+            // Simple loop to load posts
+            for (int i = 0; i < postsArray.length(); i++) {
+                JSONObject postData = postsArray.getJSONObject(i);
+                
+                // Create discussion object
+                Discussion discussion = new Discussion(
+                    postData.getInt("POST_ID"),
+                    postData.getString("AUTHOR_NAME"),
+                    postData.getString("TITLE"),
+                    postData.getString("POST_QUESTION"),
+                    "5m ago", // Simple timestamp
+                    postData.getInt("VOTE_COUNT")
+                );
+                
+                discussionsList.add(discussion);
+            }
+        } catch (Exception e) {
+            // If something goes wrong, just load sample data
+            loadSampleData();
+        }
+        
+        // Update RecyclerView
         filteredList.addAll(discussionsList);
-        discussionAdapter.notifyDataSetChanged();
+        if (discussionAdapter != null) {
+            discussionAdapter.notifyDataSetChanged();
+        }
+    }
+    
+    private void loadSampleData() {
+        // Simple fallback data
+        discussionsList.add(new Discussion(
+            1,
+            "John Doe",
+            "Help with Assignment 1",
+            "I'm having trouble with the database connection...",
+            "5m ago",
+            12
+        ));
+        
+        discussionsList.add(new Discussion(
+            2,
+            "Jane Smith", 
+            "Study Group Formation",
+            "Anyone interested in forming a study group for the upcoming exam?",
+            "10m ago",
+            8
+        ));
+        
+        discussionsList.add(new Discussion(
+            3,
+            "Mike Johnson",
+            "Android Studio Error",
+            "Getting a compilation error when trying to run my app...",
+            "15m ago",
+            5
+        ));
     }
 
     private void filterDiscussions(String query) {
@@ -101,6 +179,8 @@ public class HomeFragment extends AppCompatActivity {
             }
         }
 
-        discussionAdapter.notifyDataSetChanged();
+        if (discussionAdapter != null) {
+            discussionAdapter.notifyDataSetChanged();
+        }
     }
 }

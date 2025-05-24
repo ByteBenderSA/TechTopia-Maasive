@@ -38,14 +38,18 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        NotificationModel model = notificationList.get(position);
-        holder.title.setText(model.getTitle());
-        holder.time.setText(model.getTime());
+        if (notificationList != null && position < notificationList.size()) {
+            NotificationModel model = notificationList.get(position);
+            if (model != null) {
+                holder.title.setText(model.getTitle());
+                holder.time.setText(model.getTime());
+            }
+        }
     }
 
     @Override
     public int getItemCount() {
-        return notificationList.size();
+        return notificationList != null ? notificationList.size() : 0;
     }
 }
 

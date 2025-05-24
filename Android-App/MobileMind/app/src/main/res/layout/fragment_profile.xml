@@ -37,15 +37,18 @@
                 android:layout_gravity="center"
                 android:layout_marginBottom="32dp">
 
-                <ImageView
-                    android:id="@+id/profile_image"
+                <TextView
+                    android:id="@+id/profile_initials"
                     android:layout_width="96dp"
                     android:layout_height="96dp"
                     android:layout_centerInParent="true"
                     android:background="@drawable/circle_background"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_person_placeholder"
-                    android:contentDescription="@string/profile_image_desc"/>
+                    android:gravity="center"
+                    android:text="JD"
+                    android:textColor="@android:color/white"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:contentDescription="Profile Initials"/>
 
             </RelativeLayout>
 

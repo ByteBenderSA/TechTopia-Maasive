@@ -1,5 +1,7 @@
 package com.example.mobilemind;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -12,8 +14,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ForumPostActivity extends AppCompatActivity implements CommentAdapter.CommentInteractionListener {
 
@@ -72,57 +82,91 @@ public class ForumPostActivity extends AppCompatActivity implements CommentAdapt
     }
 
     private void setupPost() {
-        // Create a mock post
-        currentPost = new ForumPost(
-                "author123",
-                "John Doe",
-                System.currentTimeMillis() - 300000, // 5 minutes ago
-                "Learning Resources for Module 3: Data Structures",
-                "Hello everyone! I've compiled some helpful resources for " +
-                        "this week's module on data structures. These articles and videos have been " +
-                        "extremely useful for me, and I thought they might help others who are " +
-                        "struggling with linked lists and trees. Let me know if you have any other recommendations!",
-                152,
-                42,
-                7,
-                false);
+        // Get post data from Intent first (if available)
+        Intent intent = getIntent();
+        if (intent.hasExtra("POST_ID")) {
+            // Use passed post data
+            String postTitle = intent.getStringExtra("POST_TITLE");
+            String postContent = intent.getStringExtra("POST_CONTENT");
+            String postAuthor = intent.getStringExtra("POST_AUTHOR");
+            int postVotes = intent.getIntExtra("POST_VOTES", 0);
+            
+            currentPost = new ForumPost(
+                "student123", // Simple fallback for student number
+                postAuthor,
+                System.currentTimeMillis(),
+                postTitle,
+                postContent,
+                0,
+                postVotes,
+                0,
+                false
+            );
+        } else {
+            // Fallback: Get post data from SharedPreferences
+            SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            String postsData = sharedPreferences.getString("posts_data", "[]");
+            
+            try {
+                JSONArray postsArray = new JSONArray(postsData);
+                
+                // Get the first post for simplicity (student approach)
+                if (postsArray.length() > 0) {
+                    JSONObject postData = postsArray.getJSONObject(0);
+                    
+                    // Create post object
+                    currentPost = new ForumPost(
+                        postData.getString("STUDENT_NUMBER"),
+                        postData.getString("AUTHOR_NAME"),
+                        System.currentTimeMillis(),
+                        postData.getString("TITLE"),
+                        postData.getString("POST_QUESTION"),
+                        0,
+                        postData.getInt("VOTE_COUNT"),
+                        0,
+                        false
+                    );
+                } else {
+                    // Use mock data if no posts found
+                    currentPost = new ForumPost(
+                        "123456",
+                        "John Doe",
+                        System.currentTimeMillis(),
+                        "Sample Post Title",
+                        "This is a sample post content for testing.",
+                        0, 42, 5, false
+                    );
+                }
+            } catch (Exception e) {
+                // Simple fallback
+                currentPost = new ForumPost(
+                    "123456",
+                    "John Doe", 
+                    System.currentTimeMillis(),
+                    "Sample Post Title",
+                    "This is a sample post content for testing.",
+                    0, 42, 5, false
+                );
+            }
+        }
 
-        // Set user information
-        profileInitials.setText(ForumUtils.getUserInitials(currentPost.getAuthorName()));
+        // Display post information
+        profileInitials.setText(currentPost.getAuthorName().substring(0, 2).toUpperCase());
         userName.setText(currentPost.getAuthorName());
-        postTime.setText(ForumUtils.formatTimeAgo(this, currentPost.getTimestamp()));
-
-        // Set post content
+        postTime.setText("5m ago");
         postHeading.setText(currentPost.getTitle());
         postBody.setText(currentPost.getContent());
-
-        // Set interaction stats
         likesCount.setText(String.valueOf(currentPost.getLikeCount()));
         commentsCount.setText(String.valueOf(currentPost.getCommentCount()));
 
-        // Set up button click listeners
-        likesContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Handle like button click
-                toggleLike();
-            }
+        // Simple click listeners
+        likesContainer.setOnClickListener(v -> {
+            currentPost.setLikeCount(currentPost.getLikeCount() + 1);
+            likesCount.setText(String.valueOf(currentPost.getLikeCount()));
         });
 
-        commentsContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Focus on comment input
-                commentInput.requestFocus();
-            }
-        });
-
-        menuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Show options menu
-                showPostOptions();
-            }
+        commentsContainer.setOnClickListener(v -> {
+            commentInput.requestFocus();
         });
     }
 
@@ -151,9 +195,54 @@ public class ForumPostActivity extends AppCompatActivity implements CommentAdapt
     }
 
     private void loadComments() {
-        // In a real app, you would load comments from your database
-        // For now, let's add some mock comments
+        try {
+            SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            String commentsData = sharedPreferences.getString("comments_data", "[]");
+            
+            JSONArray commentsArray = new JSONArray(commentsData);
+            commentsList.clear();
+            
+            // Get current post ID
+            int currentPostId = getIntent().getIntExtra("POST_ID", 1);
+            
+            // Filter comments for current post
+            for (int i = 0; i < commentsArray.length(); i++) {
+                JSONObject commentData = commentsArray.getJSONObject(i);
+                
+                // Only load comments for current post
+                if (commentData.getInt("POST_ID") == currentPostId) {
+                    Comment comment = new Comment(
+                        String.valueOf(commentData.getInt("COMMENT_ID")),
+                        commentData.getString("STUDENT_NUMBER"),
+                        commentData.getString("AUTHOR_NAME"),
+                        parsePostTimestamp(commentData.getString("COMMENT_DATE")),
+                        commentData.getString("STUDENT_COMMENT"),
+                        commentData.getInt("VOTE_COUNT"),
+                        String.valueOf(currentPostId),
+                        null // Top-level comment for now
+                    );
+                    
+                    commentsList.add(comment);
+                }
+            }
+            
+            // If no comments found, load mock comments as fallback
+            if (commentsList.isEmpty()) {
+                loadMockComments();
+            }
+            
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error loading comments data", Toast.LENGTH_SHORT).show();
+            loadMockComments();
+        }
+        
+        commentAdapter.notifyDataSetChanged();
+        updateCommentCount();
+    }
 
+    private void loadMockComments() {
+        // Mock comments as fallback
         commentsList.clear();
 
         commentsList.add(new Comment(
@@ -185,9 +274,6 @@ public class ForumPostActivity extends AppCompatActivity implements CommentAdapt
                 8,
                 "post123",
                 null));
-
-        commentAdapter.notifyDataSetChanged();
-        updateCommentCount();
     }
 
     private void postNewComment() {
@@ -197,6 +283,9 @@ public class ForumPostActivity extends AppCompatActivity implements CommentAdapt
             return;
         }
 
+        // Get the actual POST_ID from intent
+        int currentPostId = getIntent().getIntExtra("POST_ID", 1);
+
         // Create a new comment
         Comment newComment = new Comment(
                 "comment" + (commentsList.size() + 1), // In real app, generate a unique ID
@@ -205,7 +294,7 @@ public class ForumPostActivity extends AppCompatActivity implements CommentAdapt
                 System.currentTimeMillis(),
                 commentText,
                 0,
-                "post123", // In real app, use actual post ID
+                String.valueOf(currentPostId), // Use actual post ID
                 null // Top-level comment
         );
 
@@ -260,5 +349,40 @@ public class ForumPostActivity extends AppCompatActivity implements CommentAdapt
 
         // In a full implementation, you would save the parentCommentId
         // when posting the reply
+    }
+
+    /**
+     * Parse timestamp from database date string
+     */
+    private long parsePostTimestamp(String dateString) {
+        // Simple approach for student project
+        try {
+            // Handle MySQL DATETIME format: "2024-01-15 14:30:25"
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            Date date = dateFormat.parse(dateString);
+            if (date != null) {
+                return date.getTime();
+            }
+        } catch (ParseException e) {
+            // If parsing fails, try simpler approach
+            try {
+                // Maybe it's just a date: "2024-01-15"
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date date = simpleDateFormat.parse(dateString);
+                if (date != null) {
+                    return date.getTime();
+                }
+            } catch (ParseException e2) {
+                // Still failed, continue to fallback
+            }
+        } catch (Exception e) {
+            // Any other error, continue to fallback
+        }
+        
+        // Fallback: return a recent timestamp (student-friendly approach)
+        long currentTime = System.currentTimeMillis();
+        // Return a time between 1-60 minutes ago
+        long minutesAgo = (long) (Math.random() * 60 + 1);
+        return currentTime - (minutesAgo * 60 * 1000);
     }
 }
