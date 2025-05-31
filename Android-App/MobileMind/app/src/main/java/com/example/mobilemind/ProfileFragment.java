@@ -1,64 +1,126 @@
 package com.example.mobilemind;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link ProfileFragment#newInstance} factory method to
+ * Use the  factory method to
  * create an instance of this fragment.
  */
 public class ProfileFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    // UI Elements
+    private TextView txtFirstName;
+    private TextView txtLastName;
+    private TextView txtStudentNumber;
+    private TextView txtRole;
+    private TextView editEmail;
+    private TextView editMobile;
+    private Button saveButton;
+    private TextView profileInitials;
 
     public ProfileFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ProfileFragment newInstance(String param1, String param2) {
-        ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+        
+        // Initialize views
+        initViews(view);
+        
+        // Setup toolbar with back button
+        androidx.appcompat.widget.Toolbar toolbar = view.findViewById(R.id.toolbar);
+        if (getActivity() != null) {
+            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+            if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
+            }
+        }
+        toolbar.setNavigationOnClickListener(v -> {
+            if (getActivity() != null) {
+                getActivity().onBackPressed();
+            }
+        });
+        
+        // Load user data
+        loadUserData();
+        
+        // Set up save button
+        setupSaveButton();
+        
+        return view;
+    }
+
+    private void initViews(View view) {
+        txtFirstName = view.findViewById(R.id.txtFirstName);
+        txtLastName = view.findViewById(R.id.etxtLastName);
+        txtStudentNumber = view.findViewById(R.id.txtStudentNumber);
+        txtRole = view.findViewById(R.id.text_role);
+        editEmail = view.findViewById(R.id.edit_email);
+        editMobile = view.findViewById(R.id.edit_mobile);
+        saveButton = view.findViewById(R.id.save_button);
+        profileInitials = view.findViewById(R.id.profile_initials);
+    }
+
+    private void loadUserData() {
+        // Get user data from SharedPreferences
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        
+        String firstName = sharedPreferences.getString("student_fname", "John");
+        String lastName = sharedPreferences.getString("student_lname", "Doe");
+        String studentNumber = sharedPreferences.getString("student_number", "1234567");
+        String email = sharedPreferences.getString("student_email", "student@wits.ac.za");
+        
+        // Set the data to views
+        txtFirstName.setText(firstName);
+        txtLastName.setText(lastName);
+        txtStudentNumber.setText(studentNumber);
+        txtRole.setText("Student");
+        editEmail.setText(email);
+        
+        // Set profile initials
+        String fullName = firstName + " " + lastName;
+        String initials = ForumUtils.getUserInitials(fullName);
+        profileInitials.setText(initials);
+        
+        // Set placeholder for optional fields
+        editMobile.setText("081 234 5678");
+    }
+
+    private void setupSaveButton() {
+        saveButton.setOnClickListener(v -> {
+            // Simple save functionality
+            String email = editEmail.getText().toString().trim();
+            String mobile = editMobile.getText().toString().trim();
+            
+            if (!email.isEmpty()) {
+                // Save updated data
+                SharedPreferences sharedPreferences = getActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("student_email", email);
+                editor.putString("student_mobile", mobile);
+                editor.apply();
+                
+                Toast.makeText(getContext(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "Please fill in required fields", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

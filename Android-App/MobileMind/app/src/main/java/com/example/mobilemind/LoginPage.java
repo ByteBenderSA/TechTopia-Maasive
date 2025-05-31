@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -84,76 +85,51 @@ public class LoginPage extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 runOnUiThread(() -> {
-                    Log.e("NetworkError", "Login request failed", e);
-                    Toast.makeText(LoginPage.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginPage.this, "Network error!", Toast.LENGTH_SHORT).show();
                 });
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                final String responseBody = response.body().string().trim();
-                Log.d("ServerResponse", "Login response: '" + responseBody + "'");
+                String responseBody = response.body().string();
 
                 runOnUiThread(() -> {
                     try {
-                        // Parse the JSON response
                         JSONObject jsonResponse = new JSONObject(responseBody);
 
-                        // Check for success or error in the response
-                        if (jsonResponse.has("success")) {
-                            boolean isSuccess = jsonResponse.getBoolean("success");
+                        if (jsonResponse.getBoolean("success")) {
+                            Toast.makeText(LoginPage.this, "Login successful!", Toast.LENGTH_SHORT).show();
 
-                            if (isSuccess) {
-                                Toast.makeText(LoginPage.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                            // Get user data
+                            JSONObject userData = jsonResponse.getJSONObject("user");
 
-                                // Extract user data if available
-                                if (jsonResponse.has("user")) {
-                                    JSONObject userData = jsonResponse.getJSONObject("user");
+                            // Store basic user info
+                            SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            
+                            editor.putString("student_number", userData.getString("STUDENT_NUMBER"));
+                            editor.putString("student_fname", userData.getString("STUDENT_FNAME"));
+                            editor.putString("student_lname", userData.getString("STUDENT_LNAME"));
+                            editor.putString("student_email", userData.getString("STUDENT_EMAIL"));
 
-                                    // Extract individual user data fields
-                                    String student_number = userData.getString("STUDENT_NUMBER");
-                                    String student_fname = userData.getString("STUDENT_FNAME");
-                                    String student_lname = userData.getString("STUDENT_LNAME");
-                                    String student_contact_no = userData.getString("STUDENT_CONTACT_NO");
-                                    String student_email = userData.getString("STUDENT_EMAIL");
-                                    String user_role = userData.getString("USER_ROLE");
-
-                                    // Store user data in SharedPreferences
-                                    SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-                                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                                    editor.putString("student_number", student_number);
-                                    editor.putString("student_fname", student_fname);
-                                    editor.putString("student_lname", student_lname);
-                                    editor.putString("student_contact_no", student_contact_no);
-                                    editor.putString("student_email", student_email);
-                                    editor.putString("user_role", user_role);
-                                    editor.apply();
-
-                                    // Navigate to the next activity
-                                    startActivity(new Intent(LoginPage.this, ForumPostActivity.class));
-                                    finish();
-                                } else {
-                                    // Handle the case where user data is missing
-                                    Toast.makeText(LoginPage.this, "Login successful, but no user data received", Toast.LENGTH_SHORT).show();
-                                }
-                            } else {
-                                // Handle authentication failure
-                                String errorMessage = jsonResponse.optString("message", "Authentication failed");
-                                Toast.makeText(LoginPage.this, errorMessage, Toast.LENGTH_SHORT).show();
+                            // Store posts and comments if they exist
+                            if (jsonResponse.has("posts")) {
+                                editor.putString("posts_data", jsonResponse.getJSONArray("posts").toString());
                             }
-                        } else if (jsonResponse.has("error")) {
-                            // Handle old error format
-                            String errorMessage = jsonResponse.getString("error");
-                            Toast.makeText(LoginPage.this, errorMessage, Toast.LENGTH_SHORT).show();
+                            if (jsonResponse.has("comments")) {
+                                editor.putString("comments_data", jsonResponse.getJSONArray("comments").toString());
+                            }
+
+                            editor.apply();
+
+                            // Go to main activity
+                            startActivity(new Intent(LoginPage.this, MainActivity.class));
+                            finish();
                         } else {
-                            // Unknown response format
-                            Toast.makeText(LoginPage.this, "Unrecognized server response", Toast.LENGTH_SHORT).show();
-                            Log.e("LoginError", "Unrecognized response format: " + responseBody);
+                            Toast.makeText(LoginPage.this, "Login failed!", Toast.LENGTH_SHORT).show();
                         }
-                    } catch (JSONException e) {
-                        Log.e("JSONParsingError", "Error parsing JSON response: " + e.getMessage(), e);
-                        Log.e("JSONParsingError", "Response body: " + responseBody);
-                        Toast.makeText(LoginPage.this, "Error processing server response", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Toast.makeText(LoginPage.this, "Something went wrong!", Toast.LENGTH_SHORT).show();
                     }
                 });
             }

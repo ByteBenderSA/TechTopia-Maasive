@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    
+    <!-- Required permissions -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,29 +15,59 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MobileMind"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        
+        <!-- Welcome Page - App Entry Point -->
         <activity
             android:name=".WelcomePage"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.MobileMind">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <!-- Login Page -->
         <activity
             android:name=".LoginPage"
-            android:label="@string/app_name">
-            <!-- Intent filters can be added here to specify how the activity can be launched -->
+            android:exported="false"
+            android:label="@string/app_name"
+            android:parentActivityName=".WelcomePage">
         </activity>
+        
+        <!-- Register Page -->
         <activity
             android:name=".RegisterPage"
-            android:label="@string/app_name">
-            <!-- Intent filters can be added here to specify how the activity can be launched -->
+            android:exported="false"
+            android:label="@string/app_name"
+            android:parentActivityName=".WelcomePage">
         </activity>
-        <activity android:name=".ForumPostActivity">
-
+        
+        <!-- Forum Post Activity -->
+        <activity
+            android:name=".ForumPostActivity"
+            android:exported="false"
+            android:label="Forum Post"
+            android:parentActivityName=".MainActivity">
         </activity>
+        
+        <!-- Main Activity - Home with Navigation -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:label="MobileMind"
+            android:parentActivityName=".LoginPage">
+        </activity>
+        
+        <!-- Testing Activity (for development) -->
+        <activity
+            android:name=".testing"
+            android:exported="false"
+            android:label="Testing">
+        </activity>
+        
     </application>
 
 </manifest>

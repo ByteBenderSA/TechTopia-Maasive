@@ -78,6 +78,15 @@ public class Comment {
         this.upvoteCount = upvoteCount;
     }
 
+    // Compatibility methods for vote count (alias for upvoteCount)
+    public int getVoteCount() {
+        return upvoteCount;
+    }
+
+    public void setVoteCount(int voteCount) {
+        this.upvoteCount = voteCount;
+    }
+
     public String getParentPostId() {
         return parentPostId;
     }

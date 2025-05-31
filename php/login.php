@@ -1,116 +1,82 @@
 <?php
-// Database connection details
+// Simple database connection
 $host = "127.0.0.1";
 $db = "d268";
 $user = "s268";
 $pass = "s268";
 
-// Error reporting for debugging (remove in production)
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-// Create database connection
 $conn = new mysqli($host, $user, $pass, $db);
 
 // Check connection
 if ($conn->connect_error) {
-    die(json_encode([
-        "success" => false,
-        "message" => "Connection failed: " . $conn->connect_error
-    ]));
+    echo json_encode(["success" => false, "message" => "Database connection failed"]);
+    exit;
 }
 
-// Handle POST request for authentication
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Get parameters from request
-    $username = isset($_POST['STUDENT_NUMBER']) ? trim($_POST['STUDENT_NUMBER']) : '';
-    $password = isset($_POST['PASSWORD_HASH']) ? $_POST['PASSWORD_HASH'] : '';
+// Get form data
+$username = $_POST['STUDENT_NUMBER'];
+$password = $_POST['PASSWORD_HASH'];
+
+// Simple validation
+if (empty($username) || empty($password)) {
+    echo json_encode(["success" => false, "message" => "Please fill all fields"]);
+    exit;
+}
+
+// Check user credentials (basic approach)
+$sql = "SELECT PASSWORD_HASH FROM AUTHENTICATION WHERE STUDENT_NUMBER = '$username'";
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
     
-    // Validate inputs
-    if (empty($username) || empty($password)) {
-        echo json_encode([
-            "success" => false,
-            "message" => "Username and password are required"
-        ]);
-        exit;
-    }
-    
-    try {
-        // Check password
-        $result = $conn->prepare("SELECT PASSWORD_HASH FROM AUTHENTICATION WHERE STUDENT_NUMBER = ?");
-        if (!$result) {
-            throw new Exception("Prepare failed: " . $conn->error);
+    // Simple password check
+    if (password_verify($password, $row['PASSWORD_HASH'])) {
+        
+        // Get user data
+        $userSql = "SELECT STUDENT_NUMBER, STUDENT_FNAME, STUDENT_LNAME, STUDENT_EMAIL, USER_ROLE FROM USERS WHERE STUDENT_NUMBER = '$username'";
+        $userResult = $conn->query($userSql);
+        $userData = $userResult->fetch_assoc();
+        
+        // Get all posts
+        $postsSql = "SELECT p.POST_ID, p.STUDENT_NUMBER, p.TITLE, p.POST_QUESTION, p.POST_DATE, p.VOTE_COUNT, 
+                     CONCAT(u.STUDENT_FNAME, ' ', u.STUDENT_LNAME) as AUTHOR_NAME 
+                     FROM POSTS p 
+                     JOIN USERS u ON p.STUDENT_NUMBER = u.STUDENT_NUMBER 
+                     WHERE p.STATUS = 1";
+        $postsResult = $conn->query($postsSql);
+        $posts = [];
+        while ($row = $postsResult->fetch_assoc()) {
+            $posts[] = $row;
         }
         
-        $result->bind_param("s", $username);
-        $result->execute();
-        $stmt = $result->get_result();
-        
-        if ($stmt->num_rows > 0) {
-            $check_row = $stmt->fetch_assoc();
-            $storedHash = $check_row['PASSWORD_HASH'];
-            
-            if (password_verify($password, $storedHash)) {
-                // Password is correct, fetch user data
-                $data = $conn->prepare("SELECT STUDENT_NUMBER, STUDENT_FNAME, STUDENT_LNAME, STUDENT_CONTACT_NO, STUDENT_EMAIL, USER_ROLE FROM STUDENTS WHERE STUDENT_NUMBER = ?");
-                if (!$data) {
-                    throw new Exception("Prepare failed: " . $conn->error);
-                }
-                
-                $data->bind_param("s", $username);
-                $data->execute();
-                $return = $data->get_result();
-                
-                if ($return->num_rows > 0) {
-                    $userData = $return->fetch_assoc();
-                    
-                    // Start session and set session variables
-                    session_start();
-                    $_SESSION['user_id'] = $username;
-                    $_SESSION['first_name'] = $userData['STUDENT_FNAME'];
-                    $_SESSION['authenticated'] = true;
-                    
-                    // Return user data as JSON
-                    echo json_encode([
-                        "success" => true,
-                        "message" => "Authentication successful",
-                        "user" => $userData
-                    ]);
-                } else {
-                    echo json_encode([
-                        "success" => false, 
-                        "message" => "User data not found"
-                    ]);
-                }
-            } else {
-                echo json_encode([
-                    "success" => false,
-                    "message" => "Invalid username or password"
-                ]);
-            }
-        } else {
-            echo json_encode([
-                "success" => false,
-                "message" => "Invalid username or password"
-            ]);
+        // Get all comments
+        $commentsSql = "SELECT c.COMMENT_ID, c.POST_ID, c.STUDENT_NUMBER, c.STUDENT_COMMENT, c.COMMENT_DATE, c.VOTE_COUNT,
+                        CONCAT(u.STUDENT_FNAME, ' ', u.STUDENT_LNAME) as AUTHOR_NAME 
+                        FROM COMMENTS c 
+                        JOIN USERS u ON c.STUDENT_NUMBER = u.STUDENT_NUMBER 
+                        WHERE c.STATUS = 1";
+        $commentsResult = $conn->query($commentsSql);
+        $comments = [];
+        while ($row = $commentsResult->fetch_assoc()) {
+            $comments[] = $row;
         }
         
-    } catch (Exception $e) {
+        // Return success response
         echo json_encode([
-            "success" => false,
-            "message" => "An error occurred: " . $e->getMessage()
+            "success" => true,
+            "message" => "Login successful",
+            "user" => $userData,
+            "posts" => $posts,
+            "comments" => $comments
         ]);
-    } finally {
-        // Close all prepared statements
-        if (isset($result)) $result->close();
-        if (isset($data)) $data->close();
-        $conn->close();
+        
+    } else {
+        echo json_encode(["success" => false, "message" => "Wrong password"]);
     }
 } else {
-    // Handle non-POST requests
-    echo json_encode([
-        "success" => false,
-        "message" => "Invalid request method"
-    ]);
+    echo json_encode(["success" => false, "message" => "User not found"]);
 }
+
+$conn->close();
 ?>
