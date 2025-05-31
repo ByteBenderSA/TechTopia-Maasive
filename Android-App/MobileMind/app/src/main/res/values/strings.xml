@@ -28,6 +28,8 @@
     <string name="save">SAVE</string>
     <string name="user_profile">User Profile</string>
     <string name="profile_image_desc">Profile picture</string>
+    <string name="comment_reply_button_desc">comment</string>
+    <string name="comment_vote_button_desc">comment_desc</string>
 
 
 </resources>

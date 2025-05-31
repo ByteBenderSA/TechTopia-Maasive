@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mobile Mind Database Schema</title>
+    <style>
+        .table {
+            border: 2px solid #333;
+            border-radius: 5px;
+            margin: 10px;
+            padding: 10px;
+            display: inline-block;
+            vertical-align: top;
+        }
+        .table-name {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .field {
+            margin: 5px 0;
+            color: #34495e;
+        }
+        .pk {
+            color: #e74c3c;
+        }
+        .fk {
+            color: #3498db;
+        }
+        .relationship {
+            border: 1px dashed #7f8c8d;
+            margin: 10px;
+            padding: 5px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <!-- USERS Table -->
+    <div class="table">
+        <div class="table-name">USERS</div>
+        <div class="field pk">STUDENT_NUMBER (PK)</div>
+        <div class="field">STUDENT_FNAME</div>
+        <div class="field">STUDENT_LNAME</div>
+        <div class="field">STUDENT_CONTACT_NO</div>
+        <div class="field">STUDENT_EMAIL</div>
+        <div class="field">USER_ROLE</div>
+    </div>
+
+    <!-- AUTHENTICATION Table -->
+    <div class="table">
+        <div class="table-name">AUTHENTICATION</div>
+        <div class="field pk">STUDENT_NUMBER (PK, FK)</div>
+        <div class="field">PASSWORD_HASH</div>
+    </div>
+
+    <!-- POSTS Table -->
+    <div class="table">
+        <div class="table-name">POSTS</div>
+        <div class="field pk">POST_ID (PK)</div>
+        <div class="field fk">STUDENT_NUMBER (FK)</div>
+        <div class="field">TITLE</div>
+        <div class="field">POST_QUESTION</div>
+        <div class="field">POST_DATE</div>
+        <div class="field">VOTE_COUNT</div>
+        <div class="field">STATUS</div>
+    </div>
+
+    <!-- COMMENTS Table -->
+    <div class="table">
+        <div class="table-name">COMMENTS</div>
+        <div class="field pk">COMMENT_ID (PK)</div>
+        <div class="field fk">POST_ID (FK)</div>
+        <div class="field fk">STUDENT_NUMBER (FK)</div>
+        <div class="field">STUDENT_COMMENT</div>
+        <div class="field">COMMENT_DATE</div>
+        <div class="field">VOTE_COUNT</div>
+        <div class="field">STATUS</div>
+    </div>
+
+    <!-- VOTES Table -->
+    <div class="table">
+        <div class="table-name">VOTES</div>
+        <div class="field pk">VOTE_ID (PK)</div>
+        <div class="field fk">STUDENT_NUMBER (FK)</div>
+        <div class="field fk">POST_ID (FK)</div>
+        <div class="field fk">COMMENT_ID (FK)</div>
+        <div class="field">VOTE_TYPE</div>
+        <div class="field">VOTED_DATE</div>
+    </div>
+
+    <!-- Relationships -->
+    <div class="relationship">
+        USERS 1:1 AUTHENTICATION
+    </div>
+    <div class="relationship">
+        USERS 1:N POSTS
+    </div>
+    <div class="relationship">
+        POSTS 1:N COMMENTS
+    </div>
+    <div class="relationship">
+        USERS 1:N COMMENTS
+    </div>
+    <div class="relationship">
+        USERS M:N POSTS (through VOTES)
+    </div>
+    <div class="relationship">
+        USERS M:N COMMENTS (through VOTES)
+    </div>
+</body>
+</html> 

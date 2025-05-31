@@ -11,11 +11,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link ProfileFragment#newInstance} factory method to
+ * Use the  factory method to
  * create an instance of this fragment.
  */
 public class ProfileFragment extends Fragment {
@@ -25,9 +26,8 @@ public class ProfileFragment extends Fragment {
     private TextView txtLastName;
     private TextView txtStudentNumber;
     private TextView txtRole;
-    private EditText editEmail;
-    private EditText editMobile;
-    private EditText editDateOfBirth;
+    private TextView editEmail;
+    private TextView editMobile;
     private Button saveButton;
     private TextView profileInitials;
 
@@ -42,6 +42,21 @@ public class ProfileFragment extends Fragment {
         
         // Initialize views
         initViews(view);
+        
+        // Setup toolbar with back button
+        androidx.appcompat.widget.Toolbar toolbar = view.findViewById(R.id.toolbar);
+        if (getActivity() != null) {
+            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+            if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
+            }
+        }
+        toolbar.setNavigationOnClickListener(v -> {
+            if (getActivity() != null) {
+                getActivity().onBackPressed();
+            }
+        });
         
         // Load user data
         loadUserData();
@@ -59,7 +74,6 @@ public class ProfileFragment extends Fragment {
         txtRole = view.findViewById(R.id.text_role);
         editEmail = view.findViewById(R.id.edit_email);
         editMobile = view.findViewById(R.id.edit_mobile);
-        editDateOfBirth = view.findViewById(R.id.edit_date_of_birth);
         saveButton = view.findViewById(R.id.save_button);
         profileInitials = view.findViewById(R.id.profile_initials);
     }
@@ -87,7 +101,6 @@ public class ProfileFragment extends Fragment {
         
         // Set placeholder for optional fields
         editMobile.setText("081 234 5678");
-        editDateOfBirth.setText("1999-01-01");
     }
 
     private void setupSaveButton() {

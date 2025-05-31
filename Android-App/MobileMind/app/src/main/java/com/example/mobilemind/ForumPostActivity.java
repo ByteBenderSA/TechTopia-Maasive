@@ -13,11 +13,20 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.core.content.ContextCompat;
+import android.widget.ImageView;
+import android.widget.Button;
+import android.util.Log;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.content.Context;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,7 +34,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class ForumPostActivity extends AppCompatActivity implements CommentAdapter.CommentInteractionListener {
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+public class ForumPostActivity extends AppCompatActivity {
 
     private TextView profileInitials;
     private TextView userName;
@@ -40,23 +56,59 @@ public class ForumPostActivity extends AppCompatActivity implements CommentAdapt
 
     // Comment section elements
     private RecyclerView commentsRecyclerView;
-    private CommentAdapter commentAdapter;
+    private CommentAdapterHTTP commentAdapter;
     private List<Comment> commentsList;
     private EditText commentInput;
     private ImageButton postCommentButton;
     private TextView currentUserInitials;
+    private TextView commentsEmptyState;
+
+    // UPDATED: Using HTTP-based voting system instead of SharedPreferences
+    private VoteManagerHTTP voteManagerHTTP;
+    private String currentUserId = "user123";
+    private String currentUserName = "Current User";
+    private int currentPostId;
 
     // Mock data for testing
     private ForumPost currentPost;
-    private String currentUserId = "user123";
-    private String currentUserName = "Current User";
+
+    // New member variable for the post like icon
+    private ImageView postLikeIcon;
+
+
+    private List<Comment> comments = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forum_post);
 
+        // Initialize sample data if needed (keeping for fallback)
+        DataSeeder dataSeeder = new DataSeeder(this);
+        if (!dataSeeder.isDataSeeded()) {
+            dataSeeder.seedAllData();
+        }
+
+        // UPDATED: Initialize HTTP-based VoteManager instead of SharedPreferences version
+        voteManagerHTTP = new VoteManagerHTTP(this);
+        
+        // Get current user info from SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        currentUserId = sharedPreferences.getString("student_number", "user123");
+        currentUserName = sharedPreferences.getString("user_name", "Current User");
+
+        // Initialize views
         initViews();
+        
+        // Setup toolbar with back button
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
         setupPost();
         setupCommentSection();
         loadComments();
@@ -74,11 +126,15 @@ public class ForumPostActivity extends AppCompatActivity implements CommentAdapt
         commentsContainer = findViewById(R.id.comments_container);
         menuButton = findViewById(R.id.menu_button);
 
+        // Get reference to the post like icon for visual feedback
+        postLikeIcon = findViewById(R.id.post_like_icon);
+
         // Initialize comment section views
         commentsRecyclerView = findViewById(R.id.comments_recycler_view);
         commentInput = findViewById(R.id.comment_input);
         postCommentButton = findViewById(R.id.post_comment_button);
         currentUserInitials = findViewById(R.id.current_user_initials);
+        commentsEmptyState = findViewById(R.id.comments_empty_state);
     }
 
     private void setupPost() {
@@ -86,13 +142,14 @@ public class ForumPostActivity extends AppCompatActivity implements CommentAdapt
         Intent intent = getIntent();
         if (intent.hasExtra("POST_ID")) {
             // Use passed post data
+            currentPostId = intent.getIntExtra("POST_ID", 1);
             String postTitle = intent.getStringExtra("POST_TITLE");
             String postContent = intent.getStringExtra("POST_CONTENT");
             String postAuthor = intent.getStringExtra("POST_AUTHOR");
             int postVotes = intent.getIntExtra("POST_VOTES", 0);
             
             currentPost = new ForumPost(
-                "student123", // Simple fallback for student number
+                    currentUserId,
                 postAuthor,
                 System.currentTimeMillis(),
                 postTitle,
@@ -115,6 +172,7 @@ public class ForumPostActivity extends AppCompatActivity implements CommentAdapt
                     JSONObject postData = postsArray.getJSONObject(0);
                     
                     // Create post object
+                    currentPostId = postData.getInt("POST_ID");
                     currentPost = new ForumPost(
                         postData.getString("STUDENT_NUMBER"),
                         postData.getString("AUTHOR_NAME"),
@@ -128,6 +186,7 @@ public class ForumPostActivity extends AppCompatActivity implements CommentAdapt
                     );
                 } else {
                     // Use mock data if no posts found
+                    currentPostId = 1;
                     currentPost = new ForumPost(
                         "123456",
                         "John Doe",
@@ -139,6 +198,7 @@ public class ForumPostActivity extends AppCompatActivity implements CommentAdapt
                 }
             } catch (Exception e) {
                 // Simple fallback
+                currentPostId = 1;
                 currentPost = new ForumPost(
                     "123456",
                     "John Doe", 
@@ -153,236 +213,347 @@ public class ForumPostActivity extends AppCompatActivity implements CommentAdapt
         // Display post information
         profileInitials.setText(currentPost.getAuthorName().substring(0, 2).toUpperCase());
         userName.setText(currentPost.getAuthorName());
-        postTime.setText("5m ago");
+        postTime.setText(ForumUtils.formatTimeAgo(this, currentPost.getTimestamp()));
         postHeading.setText(currentPost.getTitle());
         postBody.setText(currentPost.getContent());
         likesCount.setText(String.valueOf(currentPost.getLikeCount()));
         commentsCount.setText(String.valueOf(currentPost.getCommentCount()));
 
-        // Simple click listeners
-        likesContainer.setOnClickListener(v -> {
-            currentPost.setLikeCount(currentPost.getLikeCount() + 1);
-            likesCount.setText(String.valueOf(currentPost.getLikeCount()));
-        });
+        // UPDATED: Check vote status from server and update UI
+        updatePostVoteUI();
+
+        // Set up proper voting click listener
+        likesContainer.setOnClickListener(v -> togglePostVote());
 
         commentsContainer.setOnClickListener(v -> {
             commentInput.requestFocus();
         });
     }
 
+    /**
+     * UPDATED: Get vote status from server and update UI
+     */
+    private void updatePostVoteUI() {
+        if (postLikeIcon != null) {
+            // Check vote status from PHP server
+            voteManagerHTTP.checkPostVoteStatus(currentUserId, currentPostId, new VoteManagerHTTP.VoteStatusCallback() {
+                @Override
+                public void onVoteStatusResult(VoteManagerHTTP.VoteStatusResult result) {
+                    if (result.isSuccess()) {
+                        // Update UI on main thread
+                        runOnUiThread(() -> {
+                            if (result.hasVoted()) {
+                                // User has voted - show as active/voted state
+                                postLikeIcon.setColorFilter(ContextCompat.getColor(ForumPostActivity.this, R.color.upvote_active));
+                                likesCount.setTextColor(ContextCompat.getColor(ForumPostActivity.this, R.color.upvote_active));
+                            } else {
+                                // User hasn't voted - show as inactive/default state
+                                postLikeIcon.setColorFilter(ContextCompat.getColor(ForumPostActivity.this, R.color.upvote_inactive));
+                                likesCount.setTextColor(ContextCompat.getColor(ForumPostActivity.this, R.color.upvote_inactive));
+                            }
+                            // Update vote count from server
+                            currentPost.setLikeCount(result.getVoteCount());
+                            likesCount.setText(String.valueOf(result.getVoteCount()));
+                        });
+                    } else {
+                        // Fallback to inactive state if server check fails
+                        runOnUiThread(() -> {
+                            postLikeIcon.setColorFilter(ContextCompat.getColor(ForumPostActivity.this, R.color.upvote_inactive));
+                            likesCount.setTextColor(ContextCompat.getColor(ForumPostActivity.this, R.color.upvote_inactive));
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * UPDATED: Toggle vote using HTTP requests to PHP server
+     */
+    private void togglePostVote() {
+        // Show loading message to user
+        Toast.makeText(this, "Processing vote...", Toast.LENGTH_SHORT).show();
+        
+        // Send vote request to PHP server
+        voteManagerHTTP.togglePostVote(currentUserId, currentPostId, new VoteManagerHTTP.VoteCallback() {
+            @Override
+            public void onVoteResult(VoteManagerHTTP.VoteResult result) {
+                // Update UI on main thread
+                runOnUiThread(() -> {
+                    if (result.isSuccess()) {
+                        // Update UI with new vote count from server
+                        currentPost.setLikeCount(result.getNewVoteCount());
+                        likesCount.setText(String.valueOf(result.getNewVoteCount()));
+                        
+                        // Update visual feedback by checking current status
+                        updatePostVoteUI();
+                        
+                        // Show success message to user
+                        Toast.makeText(ForumPostActivity.this, result.getMessage(), Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Show error message
+                        Toast.makeText(ForumPostActivity.this, result.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
+    }
+
     private void setupCommentSection() {
-        // Initialize comments list
         commentsList = new ArrayList<>();
+        commentAdapter = new CommentAdapterHTTP(this, commentsList,
+                new CommentAdapterHTTP.CommentInteractionListener() {
+                    @Override
+                    public void onCommentUpvoted(Comment comment, int position) {
+                        // Handle comment upvote if needed
+                    }
 
-        // Set up the RecyclerView
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        commentsRecyclerView.setLayoutManager(layoutManager);
+                    @Override
+                    public void onReplyClicked(Comment comment, int position) {
+                        commentInput.setText("@" + comment.getAuthorName() + " ");
+                        commentInput.requestFocus();
+                    }
+                }, voteManagerHTTP, currentUserId);
 
-        // Set up the adapter
-        commentAdapter = new CommentAdapter(this, commentsList, this);
+        commentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         commentsRecyclerView.setAdapter(commentAdapter);
 
-        // Set current user's initials
+        // Set current user initials
         currentUserInitials.setText(ForumUtils.getUserInitials(currentUserName));
 
-        // Set up comment posting
-        postCommentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                postNewComment();
+        // Setup comment posting
+        postCommentButton.setOnClickListener(v -> {
+                String commentText = commentInput.getText().toString().trim();
+            if (!TextUtils.isEmpty(commentText)) {
+                if (isNetworkAvailable()) {
+                    if (TextUtils.isEmpty(currentUserId) || currentPostId <= 0 || TextUtils.isEmpty(commentText)) {
+                        Toast.makeText(this, "Missing required fields for comment", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    postNewComment(commentText);
+                } else {
+                    Toast.makeText(this, "No internet connection", Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
 
     private void loadComments() {
-        try {
-            SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-            String commentsData = sharedPreferences.getString("comments_data", "[]");
-            
-            JSONArray commentsArray = new JSONArray(commentsData);
-            commentsList.clear();
-            
-            // Get current post ID
-            int currentPostId = getIntent().getIntExtra("POST_ID", 1);
-            
-            // Filter comments for current post
-            for (int i = 0; i < commentsArray.length(); i++) {
-                JSONObject commentData = commentsArray.getJSONObject(i);
-                
-                // Only load comments for current post
-                if (commentData.getInt("POST_ID") == currentPostId) {
-                    Comment comment = new Comment(
-                        String.valueOf(commentData.getInt("COMMENT_ID")),
-                        commentData.getString("STUDENT_NUMBER"),
-                        commentData.getString("AUTHOR_NAME"),
-                        parsePostTimestamp(commentData.getString("COMMENT_DATE")),
-                        commentData.getString("STUDENT_COMMENT"),
-                        commentData.getInt("VOTE_COUNT"),
-                        String.valueOf(currentPostId),
-                        null // Top-level comment for now
-                    );
-                    
-                    commentsList.add(comment);
-                }
-            }
-            
-            // If no comments found, load mock comments as fallback
-            if (commentsList.isEmpty()) {
-                loadMockComments();
-            }
-            
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Error loading comments data", Toast.LENGTH_SHORT).show();
-            loadMockComments();
+        if (!isNetworkAvailable()) {
+            Toast.makeText(this, "No internet connection", Toast.LENGTH_LONG).show();
+            return;
         }
         
-        commentAdapter.notifyDataSetChanged();
-        updateCommentCount();
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url("https://lamp.ms.wits.ac.za/home/s2688828/get_comments.php")
+                .post(new FormBody.Builder()
+                        .add("POST_ID", String.valueOf(currentPostId))
+                        .build())
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String responseBody = response.body().string();
+                Log.d("COMMENTS_RESPONSE", responseBody);
+                runOnUiThread(() -> {
+                    try {
+                        JSONObject json = new JSONObject(responseBody);
+                        if (json.getBoolean("success")) {
+                            JSONArray comments = json.getJSONArray("comments");
+                            List<Comment> commentList = new ArrayList<>();
+                            for (int i = 0; i < comments.length(); i++) {
+                                JSONObject comment = comments.getJSONObject(i);
+                                commentList.add(new Comment(
+                                        comment.getString("COMMENT_ID"),
+                                        comment.getString("STUDENT_NUMBER"),
+                                        comment.getString("AUTHOR_NAME"),
+                                        parseDate(comment.getString("COMMENT_DATE")),
+                                        comment.getString("STUDENT_COMMENT"),
+                                        comment.getInt("VOTE_COUNT"),
+                                        String.valueOf(currentPostId),
+                                        comment.optString("PARENT_COMMENT_ID")
+                                ));
+                            }
+                            commentAdapter.updateComments(commentList);
+                    updateCommentCount();
+                            commentsEmptyState.setVisibility(commentList.isEmpty() ? View.VISIBLE : View.GONE);
+                        }
+                    } catch (JSONException e) {
+                        Toast.makeText(ForumPostActivity.this, "Error parsing comments", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                runOnUiThread(() -> {
+                    Toast.makeText(ForumPostActivity.this, "Failed to load comments", Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
     }
 
-    private void loadMockComments() {
-        // Mock comments as fallback
-        commentsList.clear();
-
-        commentsList.add(new Comment(
-                "comment1",
-                "user456",
-                "Anna Smith",
-                System.currentTimeMillis() - 180000, // 3 minutes ago
-                "Thanks for sharing these resources! The video on balanced trees was particularly helpful for me.",
-                12,
-                "post123",
-                null));
-
-        commentsList.add(new Comment(
-                "comment2",
-                "user789",
-                "Mike Johnson",
-                System.currentTimeMillis() - 300000, // 5 minutes ago
-                "Could you explain more about the time complexity of tree traversals? I'm still confused about the recursive approach.",
-                5,
-                "post123",
-                null));
-
-        commentsList.add(new Comment(
-                "comment3",
-                "user234",
-                "Sarah Williams",
-                System.currentTimeMillis() - 600000, // 10 minutes ago
-                "I found a great YouTube channel that explains these concepts really well. I'll share the link in our study group!",
-                8,
-                "post123",
-                null));
-    }
-
-    private void postNewComment() {
-        String commentText = commentInput.getText().toString().trim();
-
-        if (TextUtils.isEmpty(commentText)) {
+    private void postNewComment(String commentText) {
+        // Validate input data
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            Toast.makeText(this, "User ID is missing", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (currentPostId <= 0) {
+            Toast.makeText(this, "Invalid post ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (commentText == null || commentText.trim().isEmpty()) {
+            Toast.makeText(this, "Comment cannot be empty", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Get the actual POST_ID from intent
-        int currentPostId = getIntent().getIntExtra("POST_ID", 1);
+        Log.d("COMMENT_POST", "Preparing to send comment with data:");
+        Log.d("COMMENT_POST", "STUDENT_NUMBER: " + currentUserId);
+        Log.d("COMMENT_POST", "POST_ID: " + currentPostId);
+        Log.d("COMMENT_POST", "COMMENT_TEXT: " + commentText);
 
-        // Create a new comment
-        Comment newComment = new Comment(
-                "comment" + (commentsList.size() + 1), // In real app, generate a unique ID
-                currentUserId,
-                currentUserName,
-                System.currentTimeMillis(),
-                commentText,
-                0,
-                String.valueOf(currentPostId), // Use actual post ID
-                null // Top-level comment
-        );
+        postCommentButton.setEnabled(false);
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                .build();
+        
+        // Create the request body with proper encoding
+        FormBody formBody = new FormBody.Builder()
+                .add("STUDENT_NUMBER", currentUserId.trim())
+                .add("POST_ID", String.valueOf(currentPostId))
+                .add("COMMENT_TEXT", commentText.trim())
+                .add("PARENT_COMMENT_ID", "") // Add empty parent comment ID
+                .build();
+                
+        Request request = new Request.Builder()
+                .url("https://lamp.ms.wits.ac.za/home/s2688828/comment.php")
+                .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                .addHeader("Accept", "application/json")
+                .post(formBody)
+                .build();
 
-        // Add the comment to the list
-        commentsList.add(0, newComment); // Add to the top
-        commentAdapter.notifyItemInserted(0);
+        Log.d("COMMENT_POST", "Sending request to: " + request.url());
+        Log.d("COMMENT_POST", "Request headers: " + request.headers());
+        Log.d("COMMENT_POST", "Request body: " + formBody.toString());
 
-        // Scroll to the new comment
-        commentsRecyclerView.scrollToPosition(0);
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                int responseCode = response.code();
+                Log.d("COMMENT_POST_RESPONSE", "Response code: " + responseCode);
+                
+                String responseBody = response.body() != null ? response.body().string() : "";
+                Log.d("COMMENT_POST_RESPONSE", "Raw response: " + responseBody);
+                
+                if (responseCode != 200) {
+                    Log.e("COMMENT_POST_RESPONSE", "Server error response: " + responseBody);
+                    runOnUiThread(() -> {
+                        postCommentButton.setEnabled(true);
+                        String errorMessage = "Server error (HTTP " + responseCode + ")";
+                        try {
+                            JSONObject errorJson = new JSONObject(responseBody);
+                            if (errorJson.has("message")) {
+                                errorMessage += ": " + errorJson.getString("message");
+                            }
+                        } catch (JSONException e) {
+                            Log.e("COMMENT_POST_RESPONSE", "Error parsing error response", e);
+                        }
+                        Toast.makeText(ForumPostActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                    });
+                    return;
+                }
+                
+                if (responseBody.isEmpty()) {
+                    Log.e("COMMENT_POST_RESPONSE", "Empty response received from server");
+                    runOnUiThread(() -> {
+                        postCommentButton.setEnabled(true);
+                        Toast.makeText(ForumPostActivity.this, 
+                            "Server returned empty response. Please try again.", 
+                            Toast.LENGTH_SHORT).show();
+                    });
+                    return;
+                }
+                
+                runOnUiThread(() -> {
+                    postCommentButton.setEnabled(true);
+                    try {
+                        JSONObject json = new JSONObject(responseBody);
+                        if (json.getBoolean("success")) {
+                            JSONObject commentData = json.getJSONObject("comment");
+                            Comment newComment = new Comment(
+                                    commentData.getString("COMMENT_ID"),
+                                    commentData.getString("STUDENT_NUMBER"),
+                                    commentData.getString("AUTHOR_NAME"),
+                                    parseDate(commentData.getString("COMMENT_DATE")),
+                                    commentData.getString("STUDENT_COMMENT"),
+                                    commentData.getInt("VOTE_COUNT"),
+                                    String.valueOf(currentPostId),
+                                    commentData.optString("PARENT_COMMENT_ID")
+                            );
+                            commentAdapter.addComment(newComment);
+                            updateCommentCount();
+                            commentInput.setText("");
+                            commentsEmptyState.setVisibility(View.GONE);
+                            Toast.makeText(ForumPostActivity.this, "Comment posted successfully", Toast.LENGTH_SHORT).show();
+                            
+                            // Reload comments to ensure everything is in sync
+                            loadComments();
+                        } else {
+                            String errorMessage = json.optString("message", "Unknown error occurred");
+                            Log.e("COMMENT_POST_RESPONSE", "Server error: " + errorMessage);
+                            Toast.makeText(ForumPostActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                        }
+                    } catch (JSONException e) {
+                        Log.e("COMMENT_POST_RESPONSE", "Error parsing response: " + responseBody, e);
+                        Log.e("COMMENT_POST_RESPONSE", "Exception details: " + e.getMessage());
+                        Toast.makeText(ForumPostActivity.this, 
+                            "Error parsing response: " + e.getMessage(), 
+                            Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
 
-        // Clear the input field
-        commentInput.setText("");
-
-        // Update comment count
-        updateCommentCount();
-
-        // In a real app, you would save the comment to your database here
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("COMMENT_POST_RESPONSE", "Network error: " + e.getMessage());
+                runOnUiThread(() -> {
+                    postCommentButton.setEnabled(true);
+                    Toast.makeText(ForumPostActivity.this, 
+                        "Network error: " + e.getMessage(), 
+                        Toast.LENGTH_LONG).show();
+                });
+            }
+        });
     }
 
     private void updateCommentCount() {
-        // Update the post's comment count
-        currentPost.setCommentCount(commentsList.size());
-        commentsCount.setText(String.valueOf(currentPost.getCommentCount()));
+        int count = commentAdapter.getItemCount();
+        commentsCount.setText(String.valueOf(count));
+        currentPost.setCommentCount(count);
     }
 
-    private void toggleLike() {
-        // Toggle like status and update UI
-        // In a real app, you would save this to your database
-        currentPost.setLikeCount(currentPost.getLikeCount() + 1);
-        likesCount.setText(String.valueOf(currentPost.getLikeCount()));
-    }
-
-    private void showPostOptions() {
-        // Show a menu with options for the post
-        Toast.makeText(this, "Post options", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onCommentUpvoted(Comment comment, int position) {
-        // Increment upvote count
-        comment.setUpvoteCount(comment.getUpvoteCount() + 1);
-        commentAdapter.updateComment(position, comment);
-
-        // In a real app, you would save this to your database
-    }
-
-    @Override
-    public void onReplyClicked(Comment comment, int position) {
-        // Focus on comment input and set hint for replying
-        commentInput.requestFocus();
-        commentInput.setHint("Reply to " + comment.getAuthorName() + "...");
-
-        // In a full implementation, you would save the parentCommentId
-        // when posting the reply
-    }
-
-    /**
-     * Parse timestamp from database date string
-     */
-    private long parsePostTimestamp(String dateString) {
-        // Simple approach for student project
-        try {
-            // Handle MySQL DATETIME format: "2024-01-15 14:30:25"
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-            Date date = dateFormat.parse(dateString);
-            if (date != null) {
-                return date.getTime();
-            }
-        } catch (ParseException e) {
-            // If parsing fails, try simpler approach
-            try {
-                // Maybe it's just a date: "2024-01-15"
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                Date date = simpleDateFormat.parse(dateString);
-                if (date != null) {
-                    return date.getTime();
-                }
-            } catch (ParseException e2) {
-                // Still failed, continue to fallback
-            }
-        } catch (Exception e) {
-            // Any other error, continue to fallback
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
+            return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR));
         }
-        
-        // Fallback: return a recent timestamp (student-friendly approach)
-        long currentTime = System.currentTimeMillis();
-        // Return a time between 1-60 minutes ago
-        long minutesAgo = (long) (Math.random() * 60 + 1);
-        return currentTime - (minutesAgo * 60 * 1000);
+        return false;
+    }
+
+    private long parseDate(String dateString) {
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            Date date = format.parse(dateString);
+            return date != null ? date.getTime() : System.currentTimeMillis();
+        } catch (ParseException e) {
+            return System.currentTimeMillis();
+        }
     }
 }

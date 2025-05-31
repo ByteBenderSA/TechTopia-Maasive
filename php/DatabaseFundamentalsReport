@@ -1,0 +1,106 @@
+# Course Forum Database Report
+
+## 1. Project Overview
+
+**Project Title:** Course Forum App
+
+**Team Members:**
+- Krisha Madhav
+- Tshilidzi Sibara - 268828
+- Nadia Tchuemo-Lappi (2666605)
+- Emihle Ntuntwana (2729013)
+
+**Institution:** University of the Witwatersrand  
+**Module:** Mobile Computing & Database Fundamentals  
+**Due Date:** 1 June 2025
+
+### Project Description
+
+The Mobile Mind Course Forum is a discussion platform for Mobile Computing students to post questions and responses, similar to Stack Overflow. It includes user authentication, question and comment posting, up/down voting, and soft deletion of data.
+
+## 2. System Processes / Procedures
+
+| Process | Description |
+|---------|-------------|
+| User Registration | Users register with student number, name, email, and password |
+| Login | Users log in using credentials |
+| Post Question | Users create a post with title and question text |
+| View Questions | Questions listed by votes; only active ones shown |
+| Comment | Users comment on a specific question |
+| Vote | One vote per post/comment per user (up/down) |
+| Delete | "Soft delete" by marking posts/comments as `inactive` |
+
+## 3. Business Rules (Bidirectional)
+
+| Rule | Bidirectional Statement |
+|------|------------------------|
+| One user can post many questions | Each question is posted by one user |
+| One post can have many comments | Each comment belongs to one post |
+| One user can vote on many items | Each vote belongs to one user |
+| Each user logs in through the authentication table | Each login entry links to one user |
+
+## 4. Initial ER Diagram (ERD)
+
+> **Note:** Attach original ERD with basic tables (USERS, POSTS, COMMENTS, VOTES)  
+> Ask Tshilidzi to resend the picture
+
+## 5. Design Issues Identified
+
+| Issue | Resolution |
+|-------|------------|
+| M:N (Users ↔ Votes) | Introduced VOTES table as a junction table |
+| NULLs | Allowed only where necessary (e.g., optional comment fields) |
+| Multivalued attributes | Normalized tables (e.g., no multiple votes in one row) |
+| Deletion problems | Introduced `STATUS` field for soft delete |
+
+## 6. Final ER Diagram
+
+> **Note:** Attach updated ERD showing all final fields (STATUS, VOTE_TYPE, AUTH table, etc.)  
+> Use the site Tshilidzi recommended (forgot the name of it though)
+
+## 7. Table Implementation
+
+**SQL Snippets used to create tables:**
+- USERS
+- AUTH (passwords)
+- POSTS (with STATUS)
+- COMMENTS (with STATUS)
+- VOTES (with VOTE_TYPE)
+
+## 8. Views, Functions & Triggers
+
+### Views
+
+```sql
+CREATE VIEW ActivePosts AS
+SELECT * FROM POSTS WHERE STATUS = 1;
+
+CREATE VIEW TopVotedPosts AS
+SELECT * FROM POSTS WHERE STATUS = 1 ORDER BY VOTE_COUNT DESC;
+```
+
+### Trigger
+
+```sql
+CREATE TRIGGER IncrementPostVote AFTER INSERT ON VOTES
+FOR EACH ROW
+BEGIN
+    IF NEW.POST_ID IS NOT NULL THEN
+        UPDATE POSTS SET VOTE_COUNT = VOTE_COUNT + 1 WHERE POST_ID = NEW.POST_ID;
+    END IF;
+END;
+```
+
+## 9. Demo Video
+
+> **Note:** Include a link to the video or QR code to a Google Drive or YouTube video.
+
+## 10. Conclusion
+
+This project provided valuable insight into the design and implementation of a functional, scalable database system for a real-world application. The Mobile Mind Course Forum App was structured to support the academic engagement of Mobile Computing students through a question-and-answer platform that promotes interaction and collaboration.
+
+Throughout the development process, we identified key challenges such as managing many-to-many relationships, enforcing voting restrictions, ensuring data integrity, and handling deletions in a user-friendly way. We addressed these issues by applying proper normalization techniques, using junction tables, creating soft-delete mechanisms with status flags, and leveraging database triggers and views to maintain consistency and usability.
+
+The final database design not only meets the requirements for user authentication, posting, commenting, and voting but also lays the foundation for future enhancements, such as moderator roles or analytics. This project has strengthened our understanding of relational databases, SQL implementation, and the importance of aligning database structure with business rules.
+
+We believe the Course Forum database is a solid backbone for the application and demonstrates our competence in database fundamentals.

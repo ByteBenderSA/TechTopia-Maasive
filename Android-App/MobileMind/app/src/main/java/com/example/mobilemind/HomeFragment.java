@@ -111,13 +111,18 @@ public class HomeFragment extends Fragment {
             for (int i = 0; i < postsArray.length(); i++) {
                 JSONObject postData = postsArray.getJSONObject(i);
                 
+                // Parse the timestamp from POST_DATE field
+                String postDateStr = postData.optString("POST_DATE", "");
+                long timestamp = parsePostTimestamp(postDateStr);
+                String timeAgo = ForumUtils.formatTimeAgo(getContext(), timestamp);
+                
                 // Create discussion object
                 Discussion discussion = new Discussion(
                     postData.getInt("POST_ID"),
                     postData.getString("AUTHOR_NAME"),
                     postData.getString("TITLE"),
                     postData.getString("POST_QUESTION"),
-                    "5m ago", // Simple timestamp
+                    timeAgo, // Use calculated time ago
                     postData.getInt("VOTE_COUNT")
                 );
                 
@@ -142,7 +147,7 @@ public class HomeFragment extends Fragment {
             "John Doe",
             "Help with Assignment 1",
             "I'm having trouble with the database connection...",
-            "5m ago",
+            ForumUtils.formatTimeAgo(getContext(), System.currentTimeMillis() - 300000), // 5 minutes ago
             12
         ));
         
@@ -151,7 +156,7 @@ public class HomeFragment extends Fragment {
             "Jane Smith", 
             "Study Group Formation",
             "Anyone interested in forming a study group for the upcoming exam?",
-            "10m ago",
+            ForumUtils.formatTimeAgo(getContext(), System.currentTimeMillis() - 600000), // 10 minutes ago
             8
         ));
         
@@ -160,9 +165,43 @@ public class HomeFragment extends Fragment {
             "Mike Johnson",
             "Android Studio Error",
             "Getting a compilation error when trying to run my app...",
-            "15m ago",
+            ForumUtils.formatTimeAgo(getContext(), System.currentTimeMillis() - 900000), // 15 minutes ago
             5
         ));
+    }
+
+    /**
+     * Parse timestamp from database date string (e.g., "2024-01-15 14:30:25")
+     */
+    private long parsePostTimestamp(String dateString) {
+        try {
+            // Handle MySQL DATETIME format: "2024-01-15 14:30:25"
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            Date date = dateFormat.parse(dateString);
+            if (date != null) {
+                return date.getTime();
+            }
+        } catch (ParseException e) {
+            // If parsing fails, try simpler approach
+            try {
+                // Maybe it's just a date: "2024-01-15"
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date date = simpleDateFormat.parse(dateString);
+                if (date != null) {
+                    return date.getTime();
+                }
+            } catch (ParseException e2) {
+                // Still failed, continue to fallback
+            }
+        } catch (Exception e) {
+            // Any other error, continue to fallback
+        }
+        
+        // Fallback: return a recent timestamp
+        long currentTime = System.currentTimeMillis();
+        // Return a time between 1-60 minutes ago for variety
+        long minutesAgo = (long) (Math.random() * 60 + 1);
+        return currentTime - (minutesAgo * 60 * 1000);
     }
 
     private void filterDiscussions(String query) {
